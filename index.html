@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtisanConnect - Verified Professionals. Global Quality. Local Soul.</title>
+    <meta name="description" content="ArtisanConnect connects you with verified builders, interior designers, painters, and architects across Indian cities. Browse portfolios, compare ratings, and find the perfect professional for your project.">
+    <meta name="keywords" content="builders, interior designers, painters, architects, India, construction, home improvement, renovation">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="#" class="logo" id="logo">
+                <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#browse" class="nav-link active" id="nav-browse">Browse Builders</a></li>
+                <li><a href="#register" class="nav-link" id="nav-register">Register as Pro</a></li>
+                <li><a href="#inspiration" class="nav-link" id="nav-inspiration">Find Inspiration</a></li>
+                <li><a href="#how-it-works" class="nav-link" id="nav-how">How it Works</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="search-btn" id="search-btn" aria-label="Search">
+                    <span class="material-icons-round">search</span>
+                </button>
+                <a href="admin-login.html" class="btn-dashboard" id="dashboard-btn">
+                    <span class="material-icons-round">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="login.html" class="btn-login" id="login-btn">Login</a>
+                <button class="hamburger" id="hamburger" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== MOBILE MENU ========== -->
+    <div class="mobile-menu" id="mobile-menu">
+        <ul class="mobile-nav-links">
+            <li><a href="#browse" class="mobile-nav-link active">Browse Builders</a></li>
+            <li><a href="#register" class="mobile-nav-link">Register as Pro</a></li>
+            <li><a href="#inspiration" class="mobile-nav-link">Find Inspiration</a></li>
+            <li><a href="#how-it-works" class="mobile-nav-link">How it Works</a></li>
+            <li><a href="admin-login.html" class="mobile-nav-link dashboard-mobile">Dashboard</a></li>
+            <li><a href="login.html" class="mobile-nav-link login-mobile">Login</a></li>
+        </ul>
+    </div>
+
+    <!-- ========== HERO SECTION ========== -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <img src="images/hero.png" alt="Beautiful Indian Architecture" class="hero-bg-img">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Find <span class="highlight">Verified</span> Artisans<br>Near You</h1>
+            <p class="hero-subtitle">Connect with top-rated builders, designers, and craftsmen across India. Quality guaranteed.</p>
+            <div class="hero-search">
+                <div class="hero-search-inner">
+                    <span class="material-icons-round search-icon">search</span>
+                    <input type="text" placeholder="Search for builders, designers, painters..." id="hero-search-input" class="hero-search-input">
+                    <button class="hero-search-btn" id="hero-search-btn">Search</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FILTERS SECTION ========== -->
+    <section class="filters-section" id="browse">
+        <div class="container">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <span class="filter-label">CITIES:</span>
+                    <div class="filter-chips" id="city-filters">
+                        <button class="chip active" data-city="all">All Cities</button>
+                        <button class="chip" data-city="karimnagar">Karimnagar</button>
+                        <button class="chip" data-city="warangal">Warangal</button>
+                        <button class="chip" data-city="sircilla">Sircilla</button>
+                        <button class="chip" data-city="hyderabad">Hyderabad</button>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">PROFESSION:</span>
+                    <div class="filter-chips" id="profession-filters">
+                        <button class="chip accent active" data-profession="builder">Builder</button>
+                        <button class="chip" data-profession="interior-designer">Interior Designer</button>
+                        <button class="chip" data-profession="painter">Painter</button>
+                        <button class="chip" data-profession="architect">Architect</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== BUILDERS CARDS — dynamically loaded from DB ========== -->
+    <section class="builders-section" id="builders">
+        <div class="container">
+            <div class="builders-grid" id="builders-grid">
+                <!-- Cards injected by script.js from database -->
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It <span class="highlight">Works</span></h2>
+            <p class="section-subtitle">Simple steps to find and connect with the best professionals near you</p>
+            <div class="steps-grid">
+                <div class="step-card" id="step-1">
+                    <div class="step-icon">
+                        <span class="material-icons-round">search</span>
+                    </div>
+                    <div class="step-number">01</div>
+                    <h3 class="step-title">Search</h3>
+                    <p class="step-desc">Browse through our curated list of verified professionals filtered by city and category.</p>
+                </div>
+                <div class="step-card" id="step-2">
+                    <div class="step-icon">
+                        <span class="material-icons-round">compare</span>
+                    </div>
+                    <div class="step-number">02</div>
+                    <h3 class="step-title">Compare</h3>
+                    <p class="step-desc">View portfolios, read reviews, and compare ratings to find your perfect match.</p>
+                </div>
+                <div class="step-card" id="step-3">
+                    <div class="step-icon">
+                        <span class="material-icons-round">handshake</span>
+                    </div>
+                    <div class="step-number">03</div>
+                    <h3 class="step-title">Connect</h3>
+                    <p class="step-desc">Get in touch directly with professionals and discuss your project requirements.</p>
+                </div>
+                <div class="step-card" id="step-4">
+                    <div class="step-icon">
+                        <span class="material-icons-round">verified</span>
+                    </div>
+                    <div class="step-number">04</div>
+                    <h3 class="step-title">Build</h3>
+                    <p class="step-desc">Start your project with confidence knowing every professional is identity verified.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== STATS SECTION ========== -->
+    <section class="stats-section" id="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item" id="stat-projects">
+                    <span class="stat-number" data-target="500">0</span><span class="stat-suffix">+</span>
+                    <p class="stat-label">PROJECTS COMPLETED</p>
+                </div>
+                <div class="stat-item" id="stat-cities">
+                    <span class="stat-number" data-target="12">0</span>
+                    <p class="stat-label">INDIAN CITIES</p>
+                </div>
+                <div class="stat-item" id="stat-rating">
+                    <span class="stat-number" data-target="4.9">0</span><span class="stat-suffix">/5</span>
+                    <p class="stat-label">AVERAGE RATING</p>
+                </div>
+                <div class="stat-item" id="stat-verified">
+                    <span class="stat-number" data-target="100">0</span><span class="stat-suffix">%</span>
+                    <p class="stat-label">IDENTITY VERIFIED</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== INSPIRATION SECTION ========== -->
+    <section class="inspiration-section" id="inspiration">
+        <div class="container">
+            <h2 class="section-title">Find <span class="highlight">Inspiration</span></h2>
+            <p class="section-subtitle">Explore stunning projects completed by our verified professionals</p>
+            <div class="inspiration-grid">
+                <div class="inspiration-item large" id="inspo-1">
+                    <img src="images/living_room.png" alt="Modern Living Room Design">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Living Room</span>
+                        <h4>Modern Minimalist Living</h4>
+                    </div>
+                </div>
+                <div class="inspiration-item" id="inspo-2">
+                    <img src="images/kitchen.png" alt="Kitchen Design">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Kitchen</span>
+                        <h4>Gourmet Kitchen</h4>
+                    </div>
+                </div>
+                <div class="inspiration-item" id="inspo-3">
+                    <img src="images/bedroom.png" alt="Bedroom Design">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Bedroom</span>
+                        <h4>Luxury Master Suite</h4>
+                    </div>
+                </div>
+                <div class="inspiration-item" id="inspo-4">
+                    <img src="images/bathroom.png" alt="Bathroom Design">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Bathroom</span>
+                        <h4>Spa-Inspired Bath</h4>
+                    </div>
+                </div>
+                <div class="inspiration-item tall" id="inspo-5">
+                    <img src="images/fireplace.png" alt="Fireplace Design">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Living Space</span>
+                        <h4>Cozy Fireplace Lounge</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== REGISTER CTA ========== -->
+    <section class="register-cta" id="register">
+        <div class="container">
+            <div class="cta-content">
+                <div class="cta-text">
+                    <h2 class="cta-title">Are you a <span class="highlight">Professional?</span></h2>
+                    <p class="cta-desc">Join ArtisanConnect and showcase your work to thousands of potential clients. Get verified, get noticed, get hired.</p>
+                    <ul class="cta-benefits">
+                        <li><span class="material-icons-round">check_circle</span> Free portfolio showcase</li>
+                        <li><span class="material-icons-round">check_circle</span> Verified badge for trust</li>
+                        <li><span class="material-icons-round">check_circle</span> Direct client connections</li>
+                        <li><span class="material-icons-round">check_circle</span> Priority listing in search</li>
+                    </ul>
+                    <a href="#" class="btn-register" id="register-btn">Register as Professional</a>
+                </div>
+                <div class="cta-image">
+                    <img src="images/modern.png" alt="Professional workspace">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="#" class="logo footer-logo">
+                        <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+                    </a>
+                    <p class="footer-tagline">&copy; 2024 ArtisanConnect. Verified Professionals. Global Quality.<br>Local Soul.</p>
+                </div>
+                <div class="footer-links-grid">
+                    <div class="footer-col">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Partner with Us</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Verified Badges</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">ArtisanConnect &mdash; Connecting Talent with Trust</p>
+                <div class="footer-socials">
+                    <a href="#" class="social-link" id="social-share" aria-label="Share">
+                        <span class="material-icons-round">share</span>
+                    </a>
+                    <a href="#" class="social-link" id="social-thumbs" aria-label="Like">
+                        <span class="material-icons-round">thumb_up</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

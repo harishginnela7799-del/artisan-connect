@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your Profile - ArtisanConnect</title>
+    <meta name="description" content="Complete your professional profile on ArtisanConnect. Set up your profession, pricing, and portfolio.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="pro-setup.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="setup-topbar">
+        <a href="index.html" class="logo">
+            <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+        </a>
+        <div class="setup-user" id="setup-user">
+            <div class="user-avatar" id="user-avatar">RS</div>
+            <span class="user-name" id="user-name">Welcome</span>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- Steps Indicator -->
+    <div class="steps-indicator">
+        <div class="step-dot active" data-step="1">
+            <div class="step-circle"><span class="material-icons-round">engineering</span></div>
+            <span class="step-label">Profession</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="2">
+            <div class="step-circle"><span class="material-icons-round">payments</span></div>
+            <span class="step-label">Pricing</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="3">
+            <div class="step-circle"><span class="material-icons-round">photo_library</span></div>
+            <span class="step-label">Portfolio</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-dot" data-step="4">
+            <div class="step-circle"><span class="material-icons-round">check_circle</span></div>
+            <span class="step-label">Complete</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="setup-main">
+
+        <!-- ===== STEP 1: Select Profession ===== -->
+        <section class="setup-step active" id="step-1">
+            <div class="step-header">
+                <h1 class="step-title">What's your profession?</h1>
+                <p class="step-desc">Select the service you provide. This helps homeowners find you.</p>
+            </div>
+
+            <div class="profession-grid" id="profession-grid">
+                <div class="profession-card" data-profession="builder">
+                    <div class="profession-icon"><span class="material-icons-round">domain</span></div>
+                    <h3>Builder</h3>
+                    <p>Construction, renovation & structural work</p>
+                </div>
+                <div class="profession-card" data-profession="interior-designer">
+                    <div class="profession-icon"><span class="material-icons-round">design_services</span></div>
+                    <h3>Interior Designer</h3>
+                    <p>Home & commercial interior design</p>
+                </div>
+                <div class="profession-card" data-profession="painter">
+                    <div class="profession-icon"><span class="material-icons-round">format_paint</span></div>
+                    <h3>Painter</h3>
+                    <p>Interior, exterior & decorative painting</p>
+                </div>
+                <div class="profession-card" data-profession="architect">
+                    <div class="profession-icon"><span class="material-icons-round">architecture</span></div>
+                    <h3>Architect</h3>
+                    <p>Architectural design & planning</p>
+                </div>
+                <div class="profession-card" data-profession="electrician">
+                    <div class="profession-icon"><span class="material-icons-round">electrical_services</span></div>
+                    <h3>Electrician</h3>
+                    <p>Wiring, installations & electrical work</p>
+                </div>
+                <div class="profession-card" data-profession="plumber">
+                    <div class="profession-icon"><span class="material-icons-round">plumbing</span></div>
+                    <h3>Plumber</h3>
+                    <p>Plumbing, fixtures & water systems</p>
+                </div>
+            </div>
+
+            <!-- Experience & Location -->
+            <div class="extra-fields" id="extra-fields" style="display:none">
+                <div class="field-row">
+                    <div class="field-group">
+                        <label class="field-label">Years of Experience</label>
+                        <div class="field-wrap">
+                            <span class="material-icons-round">work_history</span>
+                            <select id="experience-years">
+                                <option value="">Select...</option>
+                                <option value="1-2">1-2 Years</option>
+                                <option value="3-5">3-5 Years</option>
+                                <option value="5-8">5-8 Years</option>
+                                <option value="8-12">8-12 Years</option>
+                                <option value="12+">12+ Years</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">City / Location</label>
+                        <div class="field-wrap">
+                            <span class="material-icons-round">location_on</span>
+                            <select id="pro-city" required style="width: 100%; border: none; background: transparent; padding: 12px; font-family: var(--font-primary); font-size: 0.95rem; color: var(--clr-dark); outline: none; appearance: none; cursor: pointer;">
+                                <option value="" disabled selected>Select your City</option>
+                                <option value="Warangal">Warangal</option>
+                                <option value="Karimnagar">Karimnagar</option>
+                                <option value="Nizamabad">Nizamabad</option>
+                                <option value="Khammam">Khammam</option>
+                                <option value="Ramagundam">Ramagundam</option>
+                                <option value="Mahbubnagar">Mahbubnagar</option>
+                                <option value="Nalgonda">Nalgonda</option>
+                                <option value="Adilabad">Adilabad</option>
+                                <option value="Suryapet">Suryapet</option>
+                                <option value="Siddipet">Siddipet</option>
+                                <option value="Sircilla">Sircilla</option>
+                                <option value="Jagtial">Jagtial</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Brief Description</label>
+                    <div class="field-wrap textarea-wrap">
+                        <textarea id="pro-bio" rows="3" placeholder="Tell homeowners about your work, specialties, and what makes you different..." maxlength="300"></textarea>
+                        <span class="char-count"><span id="bio-count">0</span>/300</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STEP 2: Pricing ===== -->
+        <section class="setup-step" id="step-2">
+            <div class="step-header">
+                <h1 class="step-title">Set your pricing</h1>
+                <p class="step-desc">Define your service packages. You can always update these later.</p>
+            </div>
+
+            <div class="pricing-setup-grid">
+                <!-- Basic Package -->
+                <div class="pricing-setup-card">
+                    <div class="pricing-setup-header basic">
+                        <span class="material-icons-round">star_border</span>
+                        <h3>Basic</h3>
+                    </div>
+                    <div class="pricing-setup-body">
+                        <div class="field-group">
+                            <label class="field-label">Price</label>
+                            <div class="field-wrap">
+                                <span class="currency-prefix">₹</span>
+                                <input type="number" id="price-basic" placeholder="e.g. 500" min="0">
+                                <select id="unit-basic" class="unit-select">
+                                    <option value="per sq ft">per sq ft</option>
+                                    <option value="per room">per room</option>
+                                    <option value="per project">per project</option>
+                                    <option value="per hour">per hour</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">What's included</label>
+                            <div class="features-input">
+                                <div class="feature-tags" id="basic-tags"></div>
+                                <div class="field-wrap">
+                                    <input type="text" id="basic-feature-input" placeholder="Type a feature & press Enter">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Premium Package -->
+                <div class="pricing-setup-card featured">
+                    <div class="pricing-setup-header premium">
+                        <span class="material-icons-round">star</span>
+                        <h3>Premium</h3>
+                        <span class="popular-tag">Recommended</span>
+                    </div>
+                    <div class="pricing-setup-body">
+                        <div class="field-group">
+                            <label class="field-label">Price</label>
+                            <div class="field-wrap">
+                                <span class="currency-prefix">₹</span>
+                                <input type="number" id="price-premium" placeholder="e.g. 1200" min="0">
+                                <select id="unit-premium" class="unit-select">
+                                    <option value="per sq ft">per sq ft</option>
+                                    <option value="per room">per room</option>
+                                    <option value="per project">per project</option>
+                                    <option value="per hour">per hour</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">What's included</label>
+                            <div class="features-input">
+                                <div class="feature-tags" id="premium-tags"></div>
+                                <div class="field-wrap">
+                                    <input type="text" id="premium-feature-input" placeholder="Type a feature & press Enter">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Luxury Package -->
+                <div class="pricing-setup-card">
+                    <div class="pricing-setup-header luxury">
+                        <span class="material-icons-round">workspace_premium</span>
+                        <h3>Luxury</h3>
+                    </div>
+                    <div class="pricing-setup-body">
+                        <div class="field-group">
+                            <label class="field-label">Price</label>
+                            <div class="field-wrap">
+                                <span class="currency-prefix">₹</span>
+                                <input type="number" id="price-luxury" placeholder="e.g. 2500" min="0">
+                                <select id="unit-luxury" class="unit-select">
+                                    <option value="per sq ft">per sq ft</option>
+                                    <option value="per room">per room</option>
+                                    <option value="per project">per project</option>
+                                    <option value="per hour">per hour</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">What's included</label>
+                            <div class="features-input">
+                                <div class="feature-tags" id="luxury-tags"></div>
+                                <div class="field-wrap">
+                                    <input type="text" id="luxury-feature-input" placeholder="Type a feature & press Enter">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STEP 3: Upload Portfolio ===== -->
+        <section class="setup-step" id="step-3">
+            <div class="step-header">
+                <h1 class="step-title">Showcase your work</h1>
+                <p class="step-desc">Upload images and videos of your previous projects to attract clients.</p>
+            </div>
+
+            <!-- Images Upload -->
+            <div class="upload-section">
+                <div class="upload-section-header">
+                    <div>
+                        <h3 class="upload-title">
+                            <span class="material-icons-round">image</span>
+                            Project Images
+                        </h3>
+                        <p class="upload-subtitle">Upload up to <strong>6 images</strong> (JPG, PNG, WebP — max 5MB each)</p>
+                    </div>
+                    <span class="upload-counter"><span id="img-count">0</span> / 6</span>
+                </div>
+                <div class="upload-grid" id="image-upload-grid">
+                    <label class="upload-card" id="image-upload-trigger">
+                        <input type="file" accept="image/*" multiple id="image-input" hidden>
+                        <span class="material-icons-round upload-icon">add_photo_alternate</span>
+                        <span class="upload-label">Click to upload</span>
+                        <span class="upload-hint">or drag & drop</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Videos Upload -->
+            <div class="upload-section">
+                <div class="upload-section-header">
+                    <div>
+                        <h3 class="upload-title">
+                            <span class="material-icons-round">videocam</span>
+                            Project Videos
+                        </h3>
+                        <p class="upload-subtitle">Upload up to <strong>2 videos</strong> (MP4, MOV — max 50MB each)</p>
+                    </div>
+                    <span class="upload-counter"><span id="vid-count">0</span> / 2</span>
+                </div>
+                <div class="upload-grid videos" id="video-upload-grid">
+                    <label class="upload-card video-card" id="video-upload-trigger">
+                        <input type="file" accept="video/*" multiple id="video-input" hidden>
+                        <span class="material-icons-round upload-icon">video_call</span>
+                        <span class="upload-label">Click to upload</span>
+                        <span class="upload-hint">or drag & drop</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== STEP 4: Complete ===== -->
+        <section class="setup-step" id="step-4">
+            <div class="complete-screen">
+                <div class="complete-icon">
+                    <span class="material-icons-round">celebration</span>
+                </div>
+                <h1 class="complete-title">You're All Set!</h1>
+                <p class="complete-desc">Your professional profile is ready. Homeowners can now discover you on ArtisanConnect.</p>
+                <div class="complete-summary" id="complete-summary">
+                    <!-- Populated by JS -->
+                </div>
+                <a href="index.html" class="btn-go-live" id="btn-go-live">
+                    <span class="material-icons-round">rocket_launch</span>
+                    Go Live — View Your Profile
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Buttons -->
+    <footer class="setup-footer" id="setup-footer">
+        <button class="btn-back" id="btn-back" style="visibility:hidden">
+            <span class="material-icons-round">arrow_back</span>
+            Back
+        </button>
+        <button class="btn-next" id="btn-next">
+            Continue
+            <span class="material-icons-round">arrow_forward</span>
+        </button>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="material-icons-round toast-icon" id="toast-icon">check_circle</span>
+        <span class="toast-msg" id="toast-msg"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
+    <script src="pro-setup.js"></script>
+</body>
+</html>

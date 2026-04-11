@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ArtisanConnect</title>
+    <meta name="description" content="Manage your providers, portfolios, leads, reviews and analytics on ArtisanConnect dashboard.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- ========== TOP BAR ========== -->
+    <header class="topbar" id="topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                <span class="material-icons-round">menu</span>
+            </button>
+            <a href="index.html" class="logo" id="logo">
+                <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+            </a>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-search" id="topbar-search">
+                <span class="material-icons-round">search</span>
+                <input type="text" placeholder="Search anything..." id="global-search">
+            </div>
+            <button class="topbar-icon-btn" id="notif-btn" aria-label="Notifications">
+                <span class="material-icons-round">notifications</span>
+                <span class="notif-dot"></span>
+            </button>
+            <div class="topbar-profile" id="topbar-profile">
+                <div class="profile-avatar">RS</div>
+                <div class="profile-info-mini">
+                    <span class="profile-name-mini">Rajput & Sons</span>
+                    <span class="profile-role-mini">Pro Account</span>
+                </div>
+                <span class="material-icons-round profile-chevron">expand_more</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <div class="sidebar-section">
+                <span class="sidebar-label">MAIN MENU</span>
+                <a href="#users" class="sidebar-link" data-section="users" id="nav-users">
+                    <span class="material-icons-round">person</span>
+                    <span class="link-text">Homeowners (Users)</span>
+                </a>
+                <a href="#providers" class="sidebar-link active" data-section="providers" id="nav-providers">
+                    <span class="material-icons-round">group</span>
+                    <span class="link-text">Providers</span>
+                </a>
+                <a href="#portfolios" class="sidebar-link" data-section="portfolios" id="nav-portfolios">
+                    <span class="material-icons-round">collections</span>
+                    <span class="link-text">Portfolios</span>
+                </a>
+                <a href="#leads" class="sidebar-link" data-section="leads" id="nav-leads">
+                    <span class="material-icons-round">leaderboard</span>
+                    <span class="link-text">Leads</span>
+                    <span class="sidebar-badge">12</span>
+                </a>
+                <a href="#reviews" class="sidebar-link" data-section="reviews" id="nav-reviews">
+                    <span class="material-icons-round">rate_review</span>
+                    <span class="link-text">Reviews</span>
+                </a>
+                <a href="#analytics" class="sidebar-link" data-section="analytics" id="nav-analytics">
+                    <span class="material-icons-round">analytics</span>
+                    <span class="link-text">Analytics</span>
+                    <span class="sidebar-new-tag">NEW</span>
+                </a>
+            </div>
+            <div class="sidebar-section">
+                <span class="sidebar-label">ACCOUNT</span>
+                <a href="#settings" class="sidebar-link" data-section="settings" id="nav-settings">
+                    <span class="material-icons-round">settings</span>
+                    <span class="link-text">Settings</span>
+                </a>
+                <a href="index.html" class="sidebar-link" id="nav-home">
+                    <span class="material-icons-round">home</span>
+                    <span class="link-text">Back to Site</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- ========== SIDEBAR OVERLAY (mobile) ========== -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content" id="main-content">
+
+        <!-- ===== USERS SECTION ===== -->
+        <section class="dash-section" id="section-users">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Registered Users</h1>
+                    <p class="dash-subtitle">Manage homeowners and users on the platform</p>
+                </div>
+                <button class="btn-primary" id="add-user-btn">
+                    <span class="material-icons-round">person_add</span>
+                    Add User
+                </button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="data-table" id="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PROVIDERS SECTION ===== -->
+        <section class="dash-section active" id="section-providers">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Providers</h1>
+                    <p class="dash-subtitle">Manage all registered service providers</p>
+                </div>
+                <button class="btn-primary" id="add-provider-btn">
+                    <span class="material-icons-round">add</span>
+                    Add Provider
+                </button>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="--accent: #e8772e"><span class="material-icons-round">group</span></div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value" id="total-providers">48</span>
+                        <span class="stat-card-label">Total Providers</span>
+                    </div>
+                    <span class="stat-card-trend up">+12%</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="--accent: #5cb85c"><span class="material-icons-round">verified</span></div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">42</span>
+                        <span class="stat-card-label">Verified</span>
+                    </div>
+                    <span class="stat-card-trend up">+8%</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="--accent: #4285F4"><span class="material-icons-round">location_city</span></div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">12</span>
+                        <span class="stat-card-label">Cities</span>
+                    </div>
+                    <span class="stat-card-trend neutral">—</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="--accent: #9c27b0"><span class="material-icons-round">star</span></div>
+                    <div class="stat-card-body">
+                        <span class="stat-card-value">4.8</span>
+                        <span class="stat-card-label">Avg Rating</span>
+                    </div>
+                    <span class="stat-card-trend up">+0.2</span>
+                </div>
+            </div>
+
+            <!-- Providers Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3 class="table-title">All Providers</h3>
+                    <div class="table-actions">
+                        <div class="table-search">
+                            <span class="material-icons-round">search</span>
+                            <input type="text" placeholder="Search providers..." id="provider-search">
+                        </div>
+                        <select class="table-filter" id="provider-filter">
+                            <option value="all">All Types</option>
+                            <option value="builder">Builders</option>
+                            <option value="interior">Interior Designers</option>
+                            <option value="painter">Painters</option>
+                            <option value="architect">Architects</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="providers-table">
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th>Type</th>
+                                <th>City</th>
+                                <th>Rating</th>
+                                <th>Projects</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providers-tbody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PORTFOLIOS SECTION ===== -->
+        <section class="dash-section" id="section-portfolios">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Portfolios</h1>
+                    <p class="dash-subtitle">Browse and manage professional portfolios</p>
+                </div>
+                <div class="view-toggle" id="view-toggle">
+                    <button class="view-btn active" data-view="grid" aria-label="Grid view">
+                        <span class="material-icons-round">grid_view</span>
+                    </button>
+                    <button class="view-btn" data-view="list" aria-label="List view">
+                        <span class="material-icons-round">view_list</span>
+                    </button>
+                </div>
+            </div>
+            <div class="portfolio-grid" id="portfolio-grid">
+                <!-- Injected by JS -->
+            </div>
+        </section>
+
+        <!-- ===== LEADS SECTION ===== -->
+        <section class="dash-section" id="section-leads">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Leads</h1>
+                    <p class="dash-subtitle">Track incoming project inquiries and quote requests</p>
+                </div>
+                <div class="lead-filters">
+                    <button class="lead-filter-btn active" data-status="all">All <span class="count">24</span></button>
+                    <button class="lead-filter-btn" data-status="new">New <span class="count">12</span></button>
+                    <button class="lead-filter-btn" data-status="contacted">Contacted <span class="count">7</span></button>
+                    <button class="lead-filter-btn" data-status="converted">Converted <span class="count">5</span></button>
+                </div>
+            </div>
+            <div class="leads-list" id="leads-list">
+                <!-- Injected by JS -->
+            </div>
+        </section>
+
+        <!-- ===== REVIEWS SECTION ===== -->
+        <section class="dash-section" id="section-reviews">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Reviews</h1>
+                    <p class="dash-subtitle">Monitor and respond to customer feedback</p>
+                </div>
+            </div>
+
+            <!-- Review Stats -->
+            <div class="review-stats-grid">
+                <div class="review-stat-card main-rating">
+                    <div class="big-rating">4.8</div>
+                    <div class="big-stars">
+                        <span class="material-icons-round star-filled">star</span>
+                        <span class="material-icons-round star-filled">star</span>
+                        <span class="material-icons-round star-filled">star</span>
+                        <span class="material-icons-round star-filled">star</span>
+                        <span class="material-icons-round star-half">star_half</span>
+                    </div>
+                    <p class="rating-total">Based on 482 reviews</p>
+                </div>
+                <div class="review-stat-card">
+                    <div class="rating-bars">
+                        <div class="rating-bar-row"><span>5★</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span>347</span></div>
+                        <div class="rating-bar-row"><span>4★</span><div class="bar-track"><div class="bar-fill" style="width:18%"></div></div><span>87</span></div>
+                        <div class="rating-bar-row"><span>3★</span><div class="bar-track"><div class="bar-fill" style="width:6%"></div></div><span>29</span></div>
+                        <div class="rating-bar-row"><span>2★</span><div class="bar-track"><div class="bar-fill" style="width:3%"></div></div><span>12</span></div>
+                        <div class="rating-bar-row"><span>1★</span><div class="bar-track"><div class="bar-fill" style="width:1%"></div></div><span>7</span></div>
+                    </div>
+                </div>
+                <div class="review-stat-card sentiment">
+                    <div class="sentiment-header">Sentiment Analysis</div>
+                    <div class="sentiment-ring-wrap">
+                        <div class="sentiment-ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="ring-bg"/>
+                                <circle cx="50" cy="50" r="42" class="ring-positive" style="stroke-dashoffset: 42"/>
+                                <circle cx="50" cy="50" r="42" class="ring-neutral" style="stroke-dashoffset: 180"/>
+                                <circle cx="50" cy="50" r="42" class="ring-negative" style="stroke-dashoffset: 230"/>
+                            </svg>
+                            <span class="sentiment-center">84%</span>
+                        </div>
+                        <div class="sentiment-legend">
+                            <span class="legend-item"><span class="dot positive"></span>Positive 84%</span>
+                            <span class="legend-item"><span class="dot neutral"></span>Neutral 12%</span>
+                            <span class="legend-item"><span class="dot negative"></span>Negative 4%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews List -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3 class="table-title">Recent Reviews</h3>
+                </div>
+                <div class="dash-reviews-list" id="dash-reviews-list">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ANALYTICS SECTION ===== -->
+        <section class="dash-section" id="section-analytics">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Analytics <span class="new-badge">NEW</span></h1>
+                    <p class="dash-subtitle">Insights and performance metrics for your business</p>
+                </div>
+                <div class="date-range-picker" id="date-range">
+                    <span class="material-icons-round">calendar_today</span>
+                    <span>Last 30 Days</span>
+                    <span class="material-icons-round">expand_more</span>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Total Revenue</span>
+                        <span class="kpi-trend up"><span class="material-icons-round">trending_up</span>+18.2%</span>
+                    </div>
+                    <div class="kpi-value">₹24.8L</div>
+                    <div class="kpi-chart" id="kpi-revenue-chart"></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Projects Active</span>
+                        <span class="kpi-trend up"><span class="material-icons-round">trending_up</span>+5</span>
+                    </div>
+                    <div class="kpi-value">32</div>
+                    <div class="kpi-chart" id="kpi-projects-chart"></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Conversion Rate</span>
+                        <span class="kpi-trend up"><span class="material-icons-round">trending_up</span>+2.4%</span>
+                    </div>
+                    <div class="kpi-value">34.2%</div>
+                    <div class="kpi-chart" id="kpi-conversion-chart"></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Avg Response Time</span>
+                        <span class="kpi-trend down"><span class="material-icons-round">trending_down</span>-12min</span>
+                    </div>
+                    <div class="kpi-value">2.4 hrs</div>
+                    <div class="kpi-chart" id="kpi-response-chart"></div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="chart-card wide">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Revenue Overview</h3>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="--c: #e8772e"></span> Revenue
+                            <span class="legend-dot" style="--c: #5cb85c"></span> Profit
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="revenue-chart" height="280"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Lead Sources</h3>
+                    </div>
+                    <div class="chart-body donut-wrapper">
+                        <canvas id="source-chart" height="240"></canvas>
+                        <div class="donut-legend" id="source-legend"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Charts Row -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Projects by Category</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="category-chart" height="240"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card wide">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Monthly Leads & Conversions</h3>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="--c: #4285F4"></span> Leads
+                            <span class="legend-dot" style="--c: #e8772e"></span> Conversions
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="leads-chart" height="240"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Providers Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3 class="table-title">Top Performing Providers</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Provider</th>
+                                <th>Revenue</th>
+                                <th>Projects</th>
+                                <th>Rating</th>
+                                <th>Growth</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-providers-tbody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SETTINGS SECTION ===== -->
+        <section class="dash-section" id="section-settings">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Settings</h1>
+                    <p class="dash-subtitle">Manage your account preferences</p>
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>Profile Settings</h3>
+                <p>Account and profile configuration coming soon.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="material-icons-round toast-icon" id="toast-icon">check_circle</span>
+        <span class="toast-msg" id="toast-msg"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="db.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

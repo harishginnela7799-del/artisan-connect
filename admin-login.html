@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - ArtisanConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --clr-accent: #e8772e;
+            --clr-accent-dark: #c5601a;
+            --clr-accent-glow: rgba(232, 119, 46, 0.15);
+            --clr-dark: #1a1a1a;
+            --clr-text: #333;
+            --clr-text-muted: #999;
+            --clr-bg: #f5f3ef;
+            --clr-surface: #ffffff;
+            --clr-border: #e8e4df;
+            --clr-red: #e53935;
+            --font-primary: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+        html, body { height: 100%; }
+        body {
+            font-family: var(--font-body);
+            background: var(--clr-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        .bg-pattern {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(232,119,46,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(66,133,244,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(92,184,92,0.05) 0%, transparent 60%);
+        }
+        .bg-shape {
+            position: fixed; border-radius: 50%; opacity: 0.07;
+            animation: floatShape 20s ease-in-out infinite;
+        }
+        .bg-shape:nth-child(1) { width: 400px; height: 400px; top: -100px; left: -100px; background: var(--clr-accent); }
+        .bg-shape:nth-child(2) { width: 300px; height: 300px; bottom: -80px; right: -80px; background: #4285F4; animation-delay: -7s; animation-duration: 25s; }
+        .bg-shape:nth-child(3) { width: 200px; height: 200px; top: 50%; right: 10%; background: #5cb85c; animation-delay: -14s; animation-duration: 18s; }
+        @keyframes floatShape {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 15px) scale(0.95); }
+        }
+
+        /* Card */
+        .admin-card {
+            position: relative; z-index: 1;
+            background: var(--clr-surface);
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 420px; max-width: 92vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid var(--clr-border);
+            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Shield icon */
+        .shield-wrap {
+            width: 72px; height: 72px;
+            background: var(--clr-accent-glow);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .shield-wrap .material-icons-round {
+            font-size: 2.2rem; color: var(--clr-accent);
+        }
+
+        .admin-title {
+            font-family: var(--font-primary);
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--clr-dark); text-align: center;
+            margin-bottom: 4px;
+        }
+        .admin-subtitle {
+            text-align: center;
+            font-size: 0.88rem; color: var(--clr-text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* Inputs */
+        .input-group { margin-bottom: 20px; }
+        .input-label {
+            display: block;
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--clr-text); margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .input-wrap {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px;
+            border: 1.5px solid var(--clr-border);
+            border-radius: 12px;
+            background: #faf8f5;
+            transition: all 0.2s ease;
+        }
+        .input-wrap:focus-within {
+            border-color: var(--clr-accent);
+            box-shadow: 0 0 0 4px var(--clr-accent-glow);
+            background: #fff;
+        }
+        .input-wrap.error {
+            border-color: var(--clr-red);
+            box-shadow: 0 0 0 4px rgba(229,57,53,0.1);
+        }
+        .input-wrap .material-icons-round {
+            font-size: 1.15rem; color: var(--clr-text-muted);
+        }
+        .input-wrap input {
+            flex: 1; border: none; outline: none;
+            background: transparent;
+            font-size: 0.92rem; font-family: var(--font-body);
+            color: var(--clr-text);
+        }
+        .input-wrap input::placeholder { color: #bbb; }
+        .toggle-pw {
+            background: none; border: none; cursor: pointer; padding: 0;
+            display: flex; color: var(--clr-text-muted);
+        }
+        .toggle-pw:hover { color: var(--clr-accent); }
+
+        /* Error */
+        .error-msg {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.8rem; color: var(--clr-red);
+            margin-top: 8px;
+            min-height: 20px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .error-msg.visible { opacity: 1; }
+        .error-msg .material-icons-round { font-size: 0.95rem; }
+
+        /* Button */
+        .btn-admin {
+            width: 100%;
+            padding: 14px;
+            border: none; border-radius: 14px;
+            background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-dark));
+            color: #fff;
+            font-size: 0.95rem; font-weight: 700;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(232,119,46,0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 8px;
+        }
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(232,119,46,0.4);
+        }
+        .btn-admin:active { transform: translateY(0); }
+        .btn-admin:disabled {
+            opacity: 0.7; cursor: not-allowed; transform: none;
+        }
+        .btn-admin .material-icons-round { font-size: 1.2rem; }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        .btn-admin.loading .spinner { display: block; }
+        .btn-admin.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Back link */
+        .back-link {
+            display: flex; align-items: center; justify-content: center;
+            gap: 4px; margin-top: 24px;
+            font-size: 0.85rem; color: var(--clr-text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--clr-accent); }
+        .back-link .material-icons-round { font-size: 1.1rem; }
+
+        /* Shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="bg-shape"></div>
+    <div class="bg-shape"></div>
+    <div class="bg-shape"></div>
+
+    <div class="admin-card" id="admin-card">
+        <div class="shield-wrap">
+            <span class="material-icons-round">admin_panel_settings</span>
+        </div>
+        <h1 class="admin-title">Admin Access</h1>
+        <p class="admin-subtitle">Enter your credentials to access the dashboard</p>
+
+        <form id="admin-form" autocomplete="off">
+            <div class="input-group">
+                <label class="input-label" for="admin-user">User ID</label>
+                <div class="input-wrap" id="user-wrap">
+                    <span class="material-icons-round">person</span>
+                    <input type="text" id="admin-user" placeholder="Enter your User ID" autofocus>
+                </div>
+                <div class="error-msg" id="user-error">
+                    <span class="material-icons-round">error</span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="input-group">
+                <label class="input-label" for="admin-pass">Password</label>
+                <div class="input-wrap" id="pass-wrap">
+                    <span class="material-icons-round">lock</span>
+                    <input type="password" id="admin-pass" placeholder="Enter your password">
+                    <button type="button" class="toggle-pw" id="toggle-pw" aria-label="Show password">
+                        <span class="material-icons-round">visibility_off</span>
+                    </button>
+                </div>
+                <div class="error-msg" id="pass-error">
+                    <span class="material-icons-round">error</span>
+                    <span></span>
+                </div>
+            </div>
+            <button type="submit" class="btn-admin" id="admin-submit">
+                <span class="btn-text">Access Dashboard</span>
+                <span class="material-icons-round btn-text">arrow_forward</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+
+        <a href="index.html" class="back-link">
+            <span class="material-icons-round">arrow_back</span>
+            Back to ArtisanConnect
+        </a>
+    </div>
+
+    <script>
+        const form = document.getElementById('admin-form');
+        const userInput = document.getElementById('admin-user');
+        const passInput = document.getElementById('admin-pass');
+        const userWrap = document.getElementById('user-wrap');
+        const passWrap = document.getElementById('pass-wrap');
+        const userError = document.getElementById('user-error');
+        const passError = document.getElementById('pass-error');
+        const card = document.getElementById('admin-card');
+        const submitBtn = document.getElementById('admin-submit');
+
+        // Toggle password visibility
+        document.getElementById('toggle-pw').addEventListener('click', () => {
+            const icon = document.querySelector('#toggle-pw .material-icons-round');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                passInput.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+
+        function showError(wrapEl, errorEl, msg) {
+            wrapEl.classList.add('error');
+            errorEl.classList.add('visible');
+            errorEl.querySelector('span:last-child').textContent = msg;
+        }
+
+        function clearErrors() {
+            [userWrap, passWrap].forEach(w => w.classList.remove('error'));
+            [userError, passError].forEach(e => e.classList.remove('visible'));
+        }
+
+        // Clear errors on input
+        userInput.addEventListener('input', () => { userWrap.classList.remove('error'); userError.classList.remove('visible'); });
+        passInput.addEventListener('input', () => { passWrap.classList.remove('error'); passError.classList.remove('visible'); });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const user = userInput.value.trim();
+            const pass = passInput.value;
+            let valid = true;
+
+            if (!user) {
+                showError(userWrap, userError, 'User ID is required');
+                valid = false;
+            }
+            if (!pass) {
+                showError(passWrap, passError, 'Password is required');
+                valid = false;
+            }
+            if (!valid) return;
+
+            // Loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                if (user === 'Harish' && pass === '1234') {
+                    // Success — store admin session & redirect
+                    sessionStorage.setItem('artisan_admin', JSON.stringify({
+                        user: user,
+                        loggedIn: true,
+                        time: new Date().toISOString()
+                    }));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Wrong credentials
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    card.classList.add('shake');
+                    setTimeout(() => card.classList.remove('shake'), 400);
+
+                    if (user !== 'Harish') {
+                        showError(userWrap, userError, 'Invalid User ID');
+                    }
+                    if (pass !== '1234') {
+                        showError(passWrap, passError, 'Incorrect password');
+                    }
+                    if (user !== 'Harish' && pass !== '1234') {
+                        showError(userWrap, userError, 'Invalid credentials');
+                        showError(passWrap, passError, 'Invalid credentials');
+                    }
+                }
+            }, 1200);
+        });
+
+        // Check if already authenticated
+        const session = JSON.parse(sessionStorage.getItem('artisan_admin') || 'null');
+        if (session && session.loggedIn) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

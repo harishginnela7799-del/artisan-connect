@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - ArtisanConnect</title>
+    <meta name="description" content="View professional portfolio, projects, reviews, and pricing on ArtisanConnect.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="portfolio.css">
+</head>
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="index.html" class="logo" id="logo">
+                <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+            </a>
+            <div class="nav-actions">
+                <a href="index.html" class="btn-back" id="back-btn">
+                    <span class="material-icons-round">arrow_back</span>
+                    Back to Browse
+                </a>
+                <a href="login.html" class="btn-login" id="login-btn">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== COVER CAROUSEL ========== -->
+    <section class="cover-section" id="cover">
+        <div class="carousel" id="carousel">
+            <div class="carousel-track" id="carousel-track">
+                <!-- Slides injected by JS -->
+            </div>
+            <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Previous slide">
+                <span class="material-icons-round">chevron_left</span>
+            </button>
+            <button class="carousel-btn carousel-next" id="carousel-next" aria-label="Next slide">
+                <span class="material-icons-round">chevron_right</span>
+            </button>
+            <div class="carousel-dots" id="carousel-dots"></div>
+        </div>
+
+        <!-- Profile Overlay -->
+        <div class="profile-overlay">
+            <div class="profile-overlay-inner">
+                <div class="profile-info">
+                    <h1 class="profile-name" id="profile-name">Builder Name</h1>
+                    <div class="profile-badges">
+                        <div class="profile-rating" id="profile-rating">
+                            <span class="material-icons-round star">star</span>
+                            <span class="rating-value">4.9</span>
+                            <span class="rating-count">(128 reviews)</span>
+                        </div>
+                        <div class="verified-badge" id="verified-badge">
+                            <span class="material-icons-round">verified</span>
+                            Verified Professional
+                        </div>
+                    </div>
+                    <p class="profile-meta" id="profile-meta">
+                        <span class="meta-chip">
+                            <span class="material-icons-round">work_history</span>
+                            8 Years Experience
+                        </span>
+                        <span class="meta-divider">|</span>
+                        <span class="meta-chip">
+                            <span class="material-icons-round">architecture</span>
+                            150 Projects
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== STICKY NAV TABS ========== -->
+    <div class="section-tabs" id="section-tabs">
+        <div class="tabs-inner">
+            <a href="#about" class="section-tab active" data-tab="about">About</a>
+            <a href="#projects" class="section-tab" data-tab="projects">Projects</a>
+            <a href="#reviews" class="section-tab" data-tab="reviews">Reviews</a>
+            <a href="#pricing" class="section-tab" data-tab="pricing">Pricing</a>
+        </div>
+    </div>
+
+    <!-- ========== ABOUT SECTION ========== -->
+    <section class="portfolio-section" id="about">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="port-section-title">
+                    <span class="material-icons-round section-icon">person</span>
+                    About
+                </h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-main">
+                    <p class="about-text" id="about-text">
+                        With over 8 years of experience in residential and commercial construction, we bring vision to life with precision and passion. Our team specializes in modern, sustainable designs that blend Indian architectural heritage with contemporary aesthetics. Every project is treated as a masterpiece, from concept to completion.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight-item">
+                            <span class="material-icons-round">emoji_events</span>
+                            <div>
+                                <strong>Award Winning</strong>
+                                <span>Best Builder 2024</span>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <span class="material-icons-round">schedule</span>
+                            <div>
+                                <strong>On-Time Delivery</strong>
+                                <span>98% completion rate</span>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <span class="material-icons-round">eco</span>
+                            <div>
+                                <strong>Eco-Friendly</strong>
+                                <span>Green materials used</span>
+                            </div>
+                        </div>
+                        <div class="highlight-item">
+                            <span class="material-icons-round">support_agent</span>
+                            <div>
+                                <strong>24/7 Support</strong>
+                                <span>Dedicated project manager</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats">
+                    <div class="about-stat-card">
+                        <div class="stat-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="stat-bg"/>
+                                <circle cx="50" cy="50" r="42" class="stat-progress" style="--progress: 98"/>
+                            </svg>
+                            <span class="stat-circle-value">98%</span>
+                        </div>
+                        <span class="stat-circle-label">Client Satisfaction</span>
+                    </div>
+                    <div class="about-stat-card">
+                        <div class="stat-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" class="stat-bg"/>
+                                <circle cx="50" cy="50" r="42" class="stat-progress" style="--progress: 95"/>
+                            </svg>
+                            <span class="stat-circle-value">95%</span>
+                        </div>
+                        <span class="stat-circle-label">On-Time Delivery</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PROJECTS SECTION ========== -->
+    <section class="portfolio-section section-alt" id="projects">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="port-section-title">
+                    <span class="material-icons-round section-icon">photo_library</span>
+                    Projects
+                </h2>
+                <p class="port-section-subtitle">Showcasing our finest work across residential and commercial spaces</p>
+            </div>
+            <div class="projects-grid" id="projects-grid">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== REVIEWS SECTION ========== -->
+    <section class="portfolio-section" id="reviews">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="port-section-title">
+                    <span class="material-icons-round section-icon">rate_review</span>
+                    Reviews
+                </h2>
+                <div class="reviews-summary" id="reviews-summary">
+                    <div class="review-overall">
+                        <span class="review-big-num" id="review-avg">4.9</span>
+                        <div class="review-stars-wrap">
+                            <div class="review-stars">
+                                <span class="material-icons-round star-filled">star</span>
+                                <span class="material-icons-round star-filled">star</span>
+                                <span class="material-icons-round star-filled">star</span>
+                                <span class="material-icons-round star-filled">star</span>
+                                <span class="material-icons-round star-filled">star</span>
+                            </div>
+                            <span class="review-count">Based on 128 reviews</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reviews-list" id="reviews-list">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PRICING SECTION ========== -->
+    <section class="portfolio-section section-alt" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="port-section-title">
+                    <span class="material-icons-round section-icon">payments</span>
+                    Pricing Packages
+                </h2>
+                <p class="port-section-subtitle">Transparent pricing tailored to your project needs</p>
+            </div>
+            <div class="pricing-grid" id="pricing-grid">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CTA SECTION ========== -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <div class="cta-card">
+                <div class="cta-glow"></div>
+                <h2 class="cta-heading">Ready to Start Your <span class="highlight">Dream Project?</span></h2>
+                <p class="cta-desc">Get in touch with us today for a free consultation and personalized quote.</p>
+                <div class="cta-buttons">
+                    <button class="cta-btn cta-primary" id="request-quote-btn">
+                        <span class="material-icons-round">description</span>
+                        Request Quote
+                    </button>
+                    <button class="cta-btn cta-secondary" id="chat-btn">
+                        <span class="material-icons-round">chat</span>
+                        Chat Now
+                    </button>
+                </div>
+                <div class="cta-trust">
+                    <span class="material-icons-round">lock</span>
+                    Your information is secure and will never be shared
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="footer-inner">
+                <a href="index.html" class="logo footer-logo">
+                    <span class="logo-text">Artisan</span><span class="logo-accent">Connect</span>
+                </a>
+                <p class="footer-copy">&copy; 2024 ArtisanConnect &mdash; Connecting Talent with Trust</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== QUOTE MODAL ========== -->
+    <div class="modal-overlay" id="quote-modal">
+        <div class="modal" id="quote-modal-box">
+            <button class="modal-close" id="modal-close" aria-label="Close">
+                <span class="material-icons-round">close</span>
+            </button>
+            <div class="modal-header">
+                <span class="material-icons-round modal-icon">description</span>
+                <h3>Request a Quote</h3>
+                <p>Fill in your details and we'll get back within 24 hours</p>
+            </div>
+            <form class="modal-form" id="quote-form" novalidate>
+                <div class="modal-input-group">
+                    <label for="quote-name">Full Name</label>
+                    <div class="modal-input-wrap">
+                        <span class="material-icons-round">person</span>
+                        <input type="text" id="quote-name" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="modal-input-group">
+                    <label for="quote-phone">Phone Number</label>
+                    <div class="modal-input-wrap">
+                        <span class="material-icons-round">phone</span>
+                        <input type="tel" id="quote-phone" placeholder="+91 98765 43210" required>
+                    </div>
+                </div>
+                <div class="modal-input-group">
+                    <label for="quote-details">Project Details</label>
+                    <div class="modal-input-wrap textarea-wrap">
+                        <span class="material-icons-round">edit_note</span>
+                        <textarea id="quote-details" rows="3" placeholder="Describe your project requirements..." required></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="modal-submit" id="quote-submit">
+                    <span class="material-icons-round">send</span>
+                    Send Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== TOAST ========== -->
+    <div class="toast" id="toast">
+        <span class="material-icons-round toast-icon" id="toast-icon">check_circle</span>
+        <span class="toast-msg" id="toast-msg"></span>
+    </div>
+
+    <script src="portfolio.js"></script>
+</body>
+</html>
