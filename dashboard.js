@@ -179,12 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // USERS SECTION — Live DB
     // ============================================================
-    async function renderUsers() {
+    function renderUsers() {
         const tbody = document.getElementById('users-tbody');
         if (!tbody) return;
         // Filter out professionals and system admins
-        const allUsers = await ArtisanDB.getAllUsers();
-        const users = allUsers.filter(u => u.role === 'user' || u.role === 'homeowner');
+        const users = ArtisanDB.getAllUsers().filter(u => u.role === 'user' || u.role === 'homeowner');
         
         if (users.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;padding:32px">No homeowners signed up yet</td></tr>`;
@@ -244,8 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleUserAction(action, id) {
-        const users = await ArtisanDB.getAllUsers();
-        // Compare loosely since user_id might be numeric or strings
+        const users = ArtisanDB.getAllUsers();
+        // Compare loosely since user_id might be numeric or strings depending on local mock or older db versions
         const user = users.find(u => (u.user_id || u.userId || u.id) == id);
         if (!user) return;
 
@@ -265,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await openModal('Edit User', userFormHTML(user), 'Save Changes', 'btn-primary');
             const data = getUserFormData();
             if(!data.name || !data.email) { showToast('Name and Email are required', 'error'); return; }
-            await ArtisanDB.updateUser(id, data);
+            ArtisanDB.updateUser(id, data);
             showToast('User modified successfully!', 'success');
             renderUsers();
         }
@@ -284,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('modal-confirm');
             if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
             
-            await ArtisanDB.deleteUser(id);
+            ArtisanDB.deleteUser(id);
             closeModal(null);
             showToast('User deleted successfully!', 'error');
             renderUsers();
@@ -297,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = getUserFormData();
         if(!data.name || !data.email) { showToast('Name and Email are required', 'error'); return; }
         
-        const result = await ArtisanDB.registerUser({
+        const result = ArtisanDB.registerUser({
             name: data.name,
             email: data.email,
             phone: data.phone,
@@ -307,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(result.success) {
             showToast('User created safely!', 'success');
-            await renderUsers();
+            renderUsers();
         } else {
             showToast(result.error, 'error');
         }
@@ -315,14 +314,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderUsers(); // Initialize on load
 
-    async function renderProviders(filterType = 'all', searchQ = '') {
+    function renderProviders(filterType = 'all', searchQ = '') {
         const tbody = document.getElementById('providers-tbody');
-        let all = await ArtisanDB.getAllProviders();
+        let all = ArtisanDB.getAllProviders();
         if (filterType !== 'all') all = all.filter(p => p.type === filterType);
         if (searchQ) all = all.filter(p => p.name.toLowerCase().includes(searchQ.toLowerCase()));
 
         // Update stat
-        document.getElementById('total-providers').textContent = all.length;
+        document.getElementById('total-providers').textContent = ArtisanDB.getAllProviders().length;
 
         if (all.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#999;padding:32px">No providers found</td></tr>`;
@@ -366,8 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleProviderAction(action, id) {
-        const providers = await ArtisanDB.getAllProviders();
-        const provider  = providers.find(p => p.id == id);
+        const providers = ArtisanDB.getAllProviders();
+        const provider  = providers.find(p => p.id === id);
         if (!provider) return;
 
         if (action === 'view') {
@@ -391,16 +390,16 @@ document.addEventListener('DOMContentLoaded', () => {
             await openModal('Edit Provider', providerFormHTML(provider), 'Save Changes', 'btn-primary');
             const data = getProviderFormData();
             if (!data.name || !data.city) { showToast('Name and City are required', 'error'); return; }
-            await ArtisanDB.updateProvider(id, data);
+            ArtisanDB.updateProvider(id, data);
             showToast('Provider updated successfully!', 'success');
-            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
 
         if (action === 'toggle') {
             const newStatus = provider.status === 'active' ? 'inactive' : 'active';
-            await ArtisanDB.updateProvider(id, { status: newStatus });
+            ArtisanDB.updateProvider(id, { status: newStatus });
             showToast(`Provider ${newStatus === 'active' ? 'activated' : 'deactivated'}!`, newStatus === 'active' ? 'success' : 'info');
-            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
 
         if (action === 'delete') {
@@ -415,10 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Style delete button
             const btn = document.getElementById('modal-confirm');
             if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
-            await ArtisanDB.deleteProvider(id);
+            ArtisanDB.deleteProvider(id);
             closeModal(null);
             showToast('Provider deleted!', 'error');
-            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
     }
 
@@ -427,9 +426,9 @@ document.addEventListener('DOMContentLoaded', () => {
         await openModal('Add New Provider', providerFormHTML(), 'Add Provider', 'btn-primary');
         const data = getProviderFormData();
         if (!data.name || !data.city) { showToast('Name and City are required', 'error'); return; }
-        await ArtisanDB.addProvider({ ...data, source: 'admin' });
+        ArtisanDB.addProvider({ ...data, source: 'admin' });
         showToast(`${data.name} added successfully!`, 'success');
-        await renderProviders();
+        renderProviders();
     });
 
     // Filter & search
@@ -445,9 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // PENDING SIGNUPS — New professional registrations
     // ============================================================
-    async function renderPendingSignups() {
-        const allPros = await ArtisanDB.getAllProfessionals();
-        const pros = allPros.filter(p => p.verification_status === 'pending');
+    function renderPendingSignups() {
+        const pros = ArtisanDB.getAllProfessionals().filter(p => p.verification_status === 'pending');
         const badge = document.querySelector('#nav-providers .sidebar-badge') || (() => {
             const b = document.createElement('span');
             b.className = 'sidebar-badge';
@@ -491,13 +489,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <td>${p.email}</td>
                                     <td>${p.phone||'—'}</td>
                                     <td>${p.location||p.city||'—'}</td>
-                                    <td>${p.profession ? p.profession.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase()) : 'Not set yet'}</td>
-                                    <td>${p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+                                    <td>${p.service_type ? p.service_type.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase()) : 'Not set yet'}</td>
+                                    <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : '—'}</td>
                                     <td>
-                                        <button class="action-btn approve-btn" data-uid="${p.userId}" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem" aria-label="Approve">
+                                        <button class="action-btn approve-btn" data-uid="${p.user_id}" style="background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem" aria-label="Approve">
                                             <span class="material-icons-round" style="font-size:1rem;vertical-align:middle">check_circle</span> Approve
                                         </button>
-                                        <button class="action-btn reject-btn"  data-uid="${p.userId}" style="background:#fce4e4;color:#c62828;border:1px solid #f8bbb9;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem;margin-left:6px" aria-label="Reject">
+                                        <button class="action-btn reject-btn"  data-uid="${p.user_id}" style="background:#fce4e4;color:#c62828;border:1px solid #f8bbb9;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem;margin-left:6px" aria-label="Reject">
                                             <span class="material-icons-round" style="font-size:1rem;vertical-align:middle">cancel</span> Reject
                                         </button>
                                     </td>
@@ -513,19 +511,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Approve / Reject handlers
         panel.querySelectorAll('.approve-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                await ArtisanDB.approveProfessional(btn.dataset.uid);
-                showToast('Professional approved and listed on homepage!', 'success');
-                await renderPendingSignups();
-                await renderProviders();
+            btn.addEventListener('click', () => {
+                const result = ArtisanDB.approveProfessional(btn.dataset.uid);
+                if (result.success) {
+                    showToast('Professional approved and listed on homepage!', 'success');
+                    renderPendingSignups();
+                    renderProviders();
+                } else {
+                    showToast(result.error, 'error');
+                }
             });
         });
         panel.querySelectorAll('.reject-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                await ArtisanDB.rejectProfessional(btn.dataset.uid);
+            btn.addEventListener('click', () => {
+                ArtisanDB.rejectProfessional(btn.dataset.uid);
                 showToast('Professional signup rejected.', 'info');
-                await renderPendingSignups();
-                await renderProviders();
+                renderPendingSignups();
+                renderProviders();
             });
         });
     }
@@ -536,8 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // PORTFOLIOS — from DB approved providers
     // ============================================================
     const portfolioGrid = document.getElementById('portfolio-grid');
-    async function renderPortfolios() {
-        const active = await ArtisanDB.getApprovedProviders();
+    function renderPortfolios() {
+        const active = ArtisanDB.getApprovedProviders();
         portfolioGrid.innerHTML = active.map(p => `
             <div class="portfolio-card">
                 <div class="portfolio-card-img">
@@ -698,17 +700,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // TOP PROVIDERS TABLE in Analytics
     // ============================================================
     const topTbody = document.getElementById('top-providers-tbody');
-    ArtisanDB.getApprovedProviders().then(approved => {
-        approved.slice(0,5).forEach((p,i) => {
-            topTbody.innerHTML += `<tr>
-                <td><strong style="color:var(--clr-accent);font-size:1rem">#${i+1}</strong></td>
-                <td><span style="font-weight:600">${p.name}</span></td>
-                <td><strong>₹${(Math.random()*4+1).toFixed(1)}L</strong></td>
-                <td>${p.projects}</td>
-                <td><div class="table-rating"><span class="material-icons-round">star</span>${p.rating.toFixed(1)}</div></td>
-                <td><span class="growth-badge up">+${Math.floor(Math.random()*30+5)}%</span></td>
-            </tr>`;
-        });
+    ArtisanDB.getApprovedProviders().slice(0,5).forEach((p,i) => {
+        topTbody.innerHTML += `<tr>
+            <td><strong style="color:var(--clr-accent);font-size:1rem">#${i+1}</strong></td>
+            <td><span style="font-weight:600">${p.name}</span></td>
+            <td><strong>₹${(Math.random()*4+1).toFixed(1)}L</strong></td>
+            <td>${p.projects}</td>
+            <td><div class="table-rating"><span class="material-icons-round">star</span>${p.rating.toFixed(1)}</div></td>
+            <td><span class="growth-badge up">+${Math.floor(Math.random()*30+5)}%</span></td>
+        </tr>`;
     });
 
     // ============================================================
