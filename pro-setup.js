@@ -334,10 +334,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const luxuryUnit  = document.getElementById('unit-luxury').value;
 
         // ── DATABASE: Save professional profile ──
+        // If we only filter out DataURLs, nothing gets persisted (uploads are DataURLs today).
+        // Until we add proper storage uploads, persist a small subset safely:
+        // - keep up to 6 images
+        // - allow DataURLs, but drop extremely large ones to avoid breaking row limits
+        const MAX_DATAURL_CHARS = 750_000; // ~0.75MB text per image (rough safety cap)
+        const portfolioImages = uploadedImages
+            .map(i => i.url)
+            .filter(u => typeof u === 'string' && u.length > 0)
+            .filter(u => !u.startsWith('data:') || u.length <= MAX_DATAURL_CHARS)
+            .slice(0, MAX_IMAGES);
+
         await ArtisanDB.saveProfessionalProfile(user.user_id, {
             company_name: user.name,
-            service_type: professionLabel,
-            portfolio_images: uploadedImages.map(i => i.url),
+            service_type: selectedProfession, // keep canonical value for filters
+            portfolio_images: portfolioImages,
+            portfolio_video: null
         });
 
         // Update go-live link

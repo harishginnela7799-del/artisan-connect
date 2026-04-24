@@ -179,11 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // USERS SECTION — Live DB
     // ============================================================
-    function renderUsers() {
+    async function renderUsers() {
         const tbody = document.getElementById('users-tbody');
         if (!tbody) return;
         // Filter out professionals and system admins
-        const users = ArtisanDB.getAllUsers().filter(u => u.role === 'user' || u.role === 'homeowner');
+        const users = (await ArtisanDB.getAllUsers()).filter(u => u.role === 'user' || u.role === 'homeowner');
         
         if (users.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;padding:32px">No homeowners signed up yet</td></tr>`;
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleUserAction(action, id) {
-        const users = ArtisanDB.getAllUsers();
+        const users = await ArtisanDB.getAllUsers();
         // Compare loosely since user_id might be numeric or strings depending on local mock or older db versions
         const user = users.find(u => (u.user_id || u.userId || u.id) == id);
         if (!user) return;
@@ -264,9 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
             await openModal('Edit User', userFormHTML(user), 'Save Changes', 'btn-primary');
             const data = getUserFormData();
             if(!data.name || !data.email) { showToast('Name and Email are required', 'error'); return; }
-            ArtisanDB.updateUser(id, data);
+            await ArtisanDB.updateUser(id, data);
             showToast('User modified successfully!', 'success');
-            renderUsers();
+            await renderUsers();
         }
 
         if (action === 'delete') {
@@ -283,10 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('modal-confirm');
             if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
             
-            ArtisanDB.deleteUser(id);
+            await ArtisanDB.deleteUser(id);
             closeModal(null);
             showToast('User deleted successfully!', 'error');
-            renderUsers();
+            await renderUsers();
         }
     }
 
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = getUserFormData();
         if(!data.name || !data.email) { showToast('Name and Email are required', 'error'); return; }
         
-        const result = ArtisanDB.registerUser({
+        const result = await ArtisanDB.registerUser({
             name: data.name,
             email: data.email,
             phone: data.phone,
@@ -306,22 +306,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(result.success) {
             showToast('User created safely!', 'success');
-            renderUsers();
+            await renderUsers();
         } else {
             showToast(result.error, 'error');
         }
     });
 
-    renderUsers(); // Initialize on load
+    // Initialize on load (await to avoid empty-state flicker)
+    (async () => {
+        await renderUsers();
+    })();
 
-    function renderProviders(filterType = 'all', searchQ = '') {
+    async function renderProviders(filterType = 'all', searchQ = '') {
         const tbody = document.getElementById('providers-tbody');
-        let all = ArtisanDB.getAllProviders();
+        const allProviders = await ArtisanDB.getAllProviders();
+        let all = allProviders;
         if (filterType !== 'all') all = all.filter(p => p.type === filterType);
         if (searchQ) all = all.filter(p => p.name.toLowerCase().includes(searchQ.toLowerCase()));
 
         // Update stat
-        document.getElementById('total-providers').textContent = ArtisanDB.getAllProviders().length;
+        document.getElementById('total-providers').textContent = allProviders.length;
 
         if (all.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#999;padding:32px">No providers found</td></tr>`;
@@ -365,8 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleProviderAction(action, id) {
-        const providers = ArtisanDB.getAllProviders();
-        const provider  = providers.find(p => p.id === id);
+        const providers = await ArtisanDB.getAllProviders();
+        const provider  = providers.find(p => String(p.id) === String(id));
         if (!provider) return;
 
         if (action === 'view') {
@@ -390,16 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
             await openModal('Edit Provider', providerFormHTML(provider), 'Save Changes', 'btn-primary');
             const data = getProviderFormData();
             if (!data.name || !data.city) { showToast('Name and City are required', 'error'); return; }
-            ArtisanDB.updateProvider(id, data);
+            const result = await ArtisanDB.updateProvider(provider.id, data);
+            if (result?.success === false) { showToast(result.error || 'Update failed', 'error'); return; }
             showToast('Provider updated successfully!', 'success');
-            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
 
         if (action === 'toggle') {
             const newStatus = provider.status === 'active' ? 'inactive' : 'active';
-            ArtisanDB.updateProvider(id, { status: newStatus });
+            const result = await ArtisanDB.updateProvider(provider.id, { status: newStatus });
+            if (result?.success === false) { showToast(result.error || 'Status update failed', 'error'); return; }
             showToast(`Provider ${newStatus === 'active' ? 'activated' : 'deactivated'}!`, newStatus === 'active' ? 'success' : 'info');
-            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
 
         if (action === 'delete') {
@@ -414,10 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Style delete button
             const btn = document.getElementById('modal-confirm');
             if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
-            ArtisanDB.deleteProvider(id);
+            await ArtisanDB.deleteProvider(provider.id);
             closeModal(null);
             showToast('Provider deleted!', 'error');
-            renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
+            await renderProviders(document.getElementById('provider-filter').value, document.getElementById('provider-search').value);
         }
     }
 
@@ -426,9 +432,10 @@ document.addEventListener('DOMContentLoaded', () => {
         await openModal('Add New Provider', providerFormHTML(), 'Add Provider', 'btn-primary');
         const data = getProviderFormData();
         if (!data.name || !data.city) { showToast('Name and City are required', 'error'); return; }
-        ArtisanDB.addProvider({ ...data, source: 'admin' });
+        const result = await ArtisanDB.addProvider({ ...data, source: 'admin' });
+        if (result?.success === false) { showToast(result.error || 'Add failed', 'error'); return; }
         showToast(`${data.name} added successfully!`, 'success');
-        renderProviders();
+        await renderProviders();
     });
 
     // Filter & search
@@ -439,13 +446,16 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProviders(document.getElementById('provider-filter').value, e.target.value);
     });
 
-    renderProviders();
+    // Initialize providers on load (await to avoid empty-state flicker)
+    (async () => {
+        await renderProviders();
+    })();
 
     // ============================================================
     // PENDING SIGNUPS — New professional registrations
     // ============================================================
-    function renderPendingSignups() {
-        const pros = ArtisanDB.getAllProfessionals().filter(p => p.verification_status === 'pending');
+    async function renderPendingSignups() {
+        const pros = (await ArtisanDB.getAllProfessionals()).filter(p => (p.verification_status || '').toString().trim().toLowerCase() === 'pending');
         const badge = document.querySelector('#nav-providers .sidebar-badge') || (() => {
             const b = document.createElement('span');
             b.className = 'sidebar-badge';
@@ -511,35 +521,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Approve / Reject handlers
         panel.querySelectorAll('.approve-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const result = ArtisanDB.approveProfessional(btn.dataset.uid);
-                if (result.success) {
+            btn.addEventListener('click', async () => {
+                const result = await ArtisanDB.approveProfessional(btn.dataset.uid);
+                if (result?.success) {
                     showToast('Professional approved and listed on homepage!', 'success');
-                    renderPendingSignups();
-                    renderProviders();
+                    await renderPendingSignups();
+                    await renderProviders();
                 } else {
-                    showToast(result.error, 'error');
+                    showToast(result?.error || 'Approval failed', 'error');
                 }
             });
         });
         panel.querySelectorAll('.reject-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                ArtisanDB.rejectProfessional(btn.dataset.uid);
+            btn.addEventListener('click', async () => {
+                const result = await ArtisanDB.rejectProfessional(btn.dataset.uid);
+                if (result?.success === false) { showToast(result.error || 'Reject failed', 'error'); return; }
                 showToast('Professional signup rejected.', 'info');
-                renderPendingSignups();
-                renderProviders();
+                await renderPendingSignups();
+                await renderProviders();
             });
         });
     }
 
-    renderPendingSignups();
+    // Initialize pending signups on load (await to avoid empty-state flicker)
+    (async () => {
+        await renderPendingSignups();
+    })();
 
     // ============================================================
     // PORTFOLIOS — from DB approved providers
     // ============================================================
     const portfolioGrid = document.getElementById('portfolio-grid');
-    function renderPortfolios() {
-        const active = ArtisanDB.getApprovedProviders();
+    async function renderPortfolios() {
+        const active = await ArtisanDB.getApprovedProviders();
         portfolioGrid.innerHTML = active.map(p => `
             <div class="portfolio-card">
                 <div class="portfolio-card-img">
@@ -562,7 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`).join('');
     }
-    renderPortfolios();
+    // Initialize portfolios on load (await to avoid empty-state flicker)
+    (async () => {
+        await renderPortfolios();
+    })();
 
     // ============================================================
     // LEADS (static sample data)
@@ -700,7 +717,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // TOP PROVIDERS TABLE in Analytics
     // ============================================================
     const topTbody = document.getElementById('top-providers-tbody');
-    ArtisanDB.getApprovedProviders().slice(0,5).forEach((p,i) => {
+    (async () => {
+        const approved = await ArtisanDB.getApprovedProviders();
+        approved.slice(0, 5).forEach((p, i) => {
         topTbody.innerHTML += `<tr>
             <td><strong style="color:var(--clr-accent);font-size:1rem">#${i+1}</strong></td>
             <td><span style="font-weight:600">${p.name}</span></td>
@@ -709,7 +728,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <td><div class="table-rating"><span class="material-icons-round">star</span>${p.rating.toFixed(1)}</div></td>
             <td><span class="growth-badge up">+${Math.floor(Math.random()*30+5)}%</span></td>
         </tr>`;
-    });
+        });
+    })();
 
     // ============================================================
     // NAVBAR SCROLL

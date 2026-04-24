@@ -62,7 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let providers = [];
         if (typeof ArtisanDB !== 'undefined') {
-            providers = await ArtisanDB.getApprovedProviders();
+            try {
+                providers = await ArtisanDB.getApprovedProviders();
+            } catch (e) {
+                console.error('Failed to fetch approved providers', e);
+            }
+        } else {
+            console.error('ArtisanDB is not loaded (missing db.js).');
         }
         
         if (providers.length === 0) {

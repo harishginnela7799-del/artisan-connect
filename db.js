@@ -23,11 +23,18 @@ const ArtisanDB = (() => {
     function _hash(pw) { return btoa(encodeURIComponent(pw + '::ac_salt')); }
     function _writeSession(data) { localStorage.setItem(KEYS.SESSION, JSON.stringify(data)); }
     function _readSession() { try { return JSON.parse(localStorage.getItem(KEYS.SESSION) || 'null'); } catch { return null; } }
+    function _normStr(v) { return (v ?? '').toString().trim().toLowerCase(); }
+    function _normServiceType(v) {
+        const s = _normStr(v);
+        if (!s) return '';
+        // Handle both "interior designer" and "interior-designer"
+        return s.replace(/\s+/g, '-');
+    }
 
     // =========================================================
     // 1. User Routes / Functions
     // =========================================================
-    async function registerUser({ name, email, phone, password, role = 'user' }) {
+    async function registerUser({ name, email, phone, password, role = 'user', writeSession = true }) {
         // UNIQUE constraints check
         const { data: existingUser } = await client.from('users').select('user_id').eq('email', email.toLowerCase()).maybeSingle();
         
@@ -49,7 +56,9 @@ const ArtisanDB = (() => {
 
         // Auto login handling handled by caller usually for user, but we'll set session
         const { password_hash: _, ...safeUser } = data;
-        _writeSession({ ...safeUser, loggedIn: true, sessionStart: new Date().toISOString() });
+        if (writeSession) {
+            _writeSession({ ...safeUser, loggedIn: true, sessionStart: new Date().toISOString() });
+        }
 
         return { success: true, user_id: data.user_id };
     }
@@ -69,7 +78,8 @@ const ArtisanDB = (() => {
     // 2. Professional & Location Setup
     // =========================================================
     async function registerProfessional({ name, email, phone, password, location }) {
-        const userRes = await registerUser({ name, email, phone, password, role: 'professional' });
+        // Don't write session until professional + location rows succeed.
+        const userRes = await registerUser({ name, email, phone, password, role: 'professional', writeSession: false });
         if (!userRes.success) return userRes;
 
         const newPro = {
@@ -91,7 +101,18 @@ const ArtisanDB = (() => {
             city: location,
             country: 'India'
         };
-        await client.from('locations').insert([newLoc]);
+        const { error: locError } = await client.from('locations').insert([newLoc]);
+        if (locError) {
+            // Don't fail silently — surface FK/constraint issues so the flow can be fixed.
+            return { success: false, error: locError.message };
+        }
+
+        // Now that all rows exist, create session once.
+        const { data: userRow, error: userErr } = await client.from('users').select('*').eq('user_id', userRes.user_id).maybeSingle();
+        if (!userErr && userRow) {
+            const { password_hash: __, ...safeUser } = userRow;
+            _writeSession({ ...safeUser, loggedIn: true, sessionStart: new Date().toISOString() });
+        }
 
         return { success: true, user_id: userRes.user_id, professional_id: proData.professional_id };
     }
@@ -146,11 +167,11 @@ const ArtisanDB = (() => {
     async function getApprovedProviders() {
         const allPros = await getAllProfessionals();
         return allPros
-            .filter(p => p.verification_status === 'approved')
+            .filter(p => _normStr(p.verification_status) === 'approved')
             .map(p => ({
                 id: p.professional_id,
                 name: p.company_name,
-                type: p.service_type || 'builder',
+                type: _normServiceType(p.service_type) || 'builder',
                 city: p.location || 'Unknown',
                 rating: 4.8,
                 projects: 10,
@@ -195,11 +216,11 @@ const ArtisanDB = (() => {
         return pros.map(p => ({
             id: p.professional_id,
             name: p.company_name,
-            type: p.service_type || 'builder',
+            type: _normServiceType(p.service_type) || 'builder',
             city: p.location,
             rating: 4.8,
             projects: 10,
-            status: p.verification_status === 'approved' ? 'active' : (p.verification_status === 'pending' ? 'pending' : 'inactive'),
+            status: _normStr(p.verification_status) === 'approved' ? 'active' : (_normStr(p.verification_status) === 'pending' ? 'pending' : 'inactive'),
             img: JSON.parse(p.portfolio_images || '[]')?.[0] || 'images/modern.png',
             email: p.email,
             phone: p.phone,
@@ -209,13 +230,14 @@ const ArtisanDB = (() => {
     }
 
     async function addProvider(data) {
-        const userRes = await registerUser({ name: data.name, email: data.email || 'auto_sys@sys.com', phone: data.phone, password: 'sys', role: 'professional' });
+        // IMPORTANT: do not overwrite current session (admin) when creating a system provider.
+        const userRes = await registerUser({ name: data.name, email: data.email || 'auto_sys@sys.com', phone: data.phone, password: 'sys', role: 'professional', writeSession: false });
         if(!userRes.success) return userRes;
         
         await client.from('professionals').insert([{
             user_id: userRes.user_id,
             company_name: data.name,
-            service_type: data.type,
+            service_type: _normServiceType(data.type) || null,
             location: data.city,
             verification_status: 'approved',
             portfolio_images: JSON.stringify([data.img])
@@ -224,9 +246,45 @@ const ArtisanDB = (() => {
     }
 
     async function updateProvider(id, data) {
-         if(data.status === 'active') await approveProfessional(id);
-         if(data.status === 'inactive') await rejectProfessional(id);
-         return {success:true};
+         // `id` is expected to be a professional_id for provider CRUD.
+         if (data.status === 'active') return await approveProfessional(id);
+         if (data.status === 'inactive') return await rejectProfessional(id);
+         
+         // Field updates (company_name/service_type/location + related user email/phone)
+         const { data: pro, error: proErr } = await client
+            .from('professionals')
+            .select('professional_id,user_id,portfolio_images')
+            .eq('professional_id', id)
+            .maybeSingle();
+         if (proErr) return { success: false, error: proErr.message };
+         if (!pro) return { success: false, error: 'Provider not found.' };
+
+         const proUpdate = {};
+         if (data.name) proUpdate.company_name = data.name;
+         if (data.type) proUpdate.service_type = _normServiceType(data.type);
+         if (data.city) proUpdate.location = data.city;
+         if (data.img) {
+            let existing = [];
+            try { existing = JSON.parse(pro.portfolio_images || '[]'); } catch { existing = []; }
+            const next = [data.img, ...existing.filter(Boolean).filter(x => x !== data.img)];
+            proUpdate.portfolio_images = JSON.stringify(next.slice(0, 6));
+         }
+
+         if (Object.keys(proUpdate).length > 0) {
+            const { error: updErr } = await client.from('professionals').update(proUpdate).eq('professional_id', id);
+            if (updErr) return { success: false, error: updErr.message };
+         }
+
+         const userUpdate = {};
+         if (data.email) userUpdate.email = data.email.trim().toLowerCase();
+         if (data.phone) userUpdate.phone = data.phone;
+         if (data.name) userUpdate.name = data.name;
+         if (Object.keys(userUpdate).length > 0) {
+            const { error: userErr } = await client.from('users').update(userUpdate).eq('user_id', pro.user_id);
+            if (userErr) return { success: false, error: userErr.message };
+         }
+
+         return { success: true };
     }
     
     async function deleteProvider(id) {
@@ -250,11 +308,13 @@ const ArtisanDB = (() => {
         getAllProviders, getApprovedProviders, addProvider, updateProvider, deleteProvider,
         approveProfessional: async (uid) => {
             const {data} = await client.from('professionals').select('professional_id').eq('user_id', uid).maybeSingle();
-            if(data) await approveProfessional(data.professional_id);
+            if (!data?.professional_id) return { success: false, error: 'Professional record not found for this user.' };
+            return await approveProfessional(data.professional_id);
         }, 
         rejectProfessional: async (uid) => {
             const {data} = await client.from('professionals').select('professional_id').eq('user_id', uid).maybeSingle();
-            if(data) await rejectProfessional(data.professional_id);
+            if (!data?.professional_id) return { success: false, error: 'Professional record not found for this user.' };
+            return await rejectProfessional(data.professional_id);
         }
     };
 })();
