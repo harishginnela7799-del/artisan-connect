@@ -401,8 +401,7 @@ const ArtisanDB = (() => {
                 professional_id,
                 user_id,
                 rating: parseInt(rating, 10),
-                comment: (comment || '').trim() || null,
-                response: null
+                comment: (comment || '').trim() || null
             }])
             .select()
             .single();
