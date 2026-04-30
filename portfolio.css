@@ -1121,7 +1121,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 /* Login Prompt & Already Submitted */
 .review-login-prompt,
-.review-already-submitted {
+.review-already-submitted,
+.review-professional-prompt {
     display: flex; align-items: center; gap: 12px;
     padding: 20px 24px;
     background: #faf8f5;
@@ -1131,11 +1132,15 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .review-login-prompt .material-icons-round {
     font-size: 1.5rem; color: var(--clr-text-muted);
 }
+.review-professional-prompt .material-icons-round {
+    font-size: 1.5rem; color: var(--clr-accent);
+}
 .review-already-submitted .material-icons-round {
     font-size: 1.5rem; color: var(--clr-green);
 }
 .review-login-prompt p,
-.review-already-submitted p {
+.review-already-submitted p,
+.review-professional-prompt p {
     font-size: 0.92rem; color: var(--clr-text-secondary);
     margin: 0;
 }
@@ -1143,6 +1148,64 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
     color: var(--clr-accent);
     font-weight: 600;
     text-decoration: underline;
+}
+
+.review-response {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--clr-accent);
+    background: rgba(232, 119, 46, 0.08);
+}
+.review-response-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--clr-accent-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+.review-response-text {
+    font-size: 0.9rem;
+    color: var(--clr-text);
+}
+.review-response-form {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.review-response-form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--clr-text-secondary);
+}
+.review-response-form textarea {
+    width: 100%;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    background: #fff;
+}
+.review-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+}
+.review-inline-btn {
+    border: 1px solid var(--clr-accent);
+    color: var(--clr-accent);
+    border-radius: var(--radius-full);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: transparent;
+}
+.review-inline-btn.danger {
+    border-color: #d9534f;
+    color: #d9534f;
 }
 
 /* No Reviews Empty State */

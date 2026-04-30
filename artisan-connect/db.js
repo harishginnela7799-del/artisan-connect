@@ -23,6 +23,8 @@ const ArtisanDB = (() => {
     function _hash(pw) { return btoa(encodeURIComponent(pw + '::ac_salt')); }
     function _writeSession(data) { localStorage.setItem(KEYS.SESSION, JSON.stringify(data)); }
     function _readSession() { try { return JSON.parse(localStorage.getItem(KEYS.SESSION) || 'null'); } catch { return null; } }
+    function _isValidRole(role) { return role === 'user' || role === 'professional'; }
+    function _getRoleFromSession(session) { return _isValidRole(session?.role) ? session.role : null; }
 
     // =========================================================
     // 1. User Routes / Functions
@@ -178,6 +180,7 @@ const ArtisanDB = (() => {
     // Aliases to support existing frontend Dashboard
     // =========================================================
     function getSession() { return _readSession(); }
+    function getCurrentRole() { return _getRoleFromSession(_readSession()); }
     function logout() { localStorage.removeItem(KEYS.SESSION); }
     
     async function getAllUsers() {
@@ -244,10 +247,204 @@ const ArtisanDB = (() => {
          return {success: !error, error: error?.message};
     }
 
+    async function getProfessionalById(professionalId) {
+        const { data: pro, error } = await client
+            .from('professionals')
+            .select('*, users(*)')
+            .eq('professional_id', professionalId)
+            .maybeSingle();
+        if (error || !pro) return null;
+
+        const user = pro.users || {};
+        const { password_hash: _, ...safeUser } = user;
+
+        return {
+            professional_id: pro.professional_id,
+            user_id: pro.user_id,
+            company_name: pro.company_name,
+            service_type: pro.service_type || 'builder',
+            location: pro.location || 'Unknown',
+            verification_status: pro.verification_status,
+            portfolio_images: pro.portfolio_images,
+            portfolio_video: pro.portfolio_video,
+            created_at: pro.created_at,
+            email: safeUser.email,
+            phone: safeUser.phone,
+            name: safeUser.name || pro.company_name
+        };
+    }
+
+    async function submitReview({ professional_id, user_id, rating, comment }) {
+        if (!rating || rating < 1 || rating > 5) return { success: false, error: 'Rating must be between 1 and 5.' };
+        if (!professional_id || !user_id) return { success: false, error: 'Professional ID and User ID are required.' };
+
+        const session = _readSession();
+        const sessionRole = _getRoleFromSession(session);
+        if (!session || !session.loggedIn || session.user_id !== user_id) {
+            return { success: false, error: 'You must be logged in as this user.' };
+        }
+        if (sessionRole !== 'user') {
+            return { success: false, error: 'Only normal users can submit reviews.' };
+        }
+
+        const { data: reviewAuthor } = await client
+            .from('users')
+            .select('role')
+            .eq('user_id', user_id)
+            .maybeSingle();
+        if (!reviewAuthor || reviewAuthor.role !== 'user') {
+            return { success: false, error: 'Only normal users can submit reviews.' };
+        }
+
+        const existing = await getUserReviewForProfessional(user_id, professional_id);
+        if (existing) return { success: false, error: 'You have already reviewed this professional.' };
+
+        const { data, error } = await client
+            .from('reviews')
+            .insert([{
+                professional_id,
+                user_id,
+                rating: parseInt(rating, 10),
+                comment: (comment || '').trim() || null,
+                response: null
+            }])
+            .select()
+            .single();
+        if (error) return { success: false, error: error.message };
+        return { success: true, review: data };
+    }
+
+    async function getReviewsForProfessional(professionalId) {
+        const { data: reviews, error } = await client
+            .from('reviews')
+            .select('*, users(name, email)')
+            .eq('professional_id', professionalId)
+            .order('created_at', { ascending: false });
+        if (error) return [];
+        return (reviews || []).map(r => ({
+            id: r.id,
+            professional_id: r.professional_id,
+            user_id: r.user_id,
+            rating: r.rating,
+            comment: r.comment,
+            response: r.response || null,
+            created_at: r.created_at,
+            reviewer_name: r.users?.name || 'Anonymous',
+            reviewer_email: r.users?.email || '',
+        }));
+    }
+
+    async function getUserReviewForProfessional(userId, professionalId) {
+        const { data } = await client
+            .from('reviews')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('professional_id', professionalId)
+            .maybeSingle();
+        return data || null;
+    }
+
+    async function updateReview({ review_id, user_id, rating, comment }) {
+        if (!review_id || !user_id) return { success: false, error: 'Review ID and user ID are required.' };
+        if (!rating || rating < 1 || rating > 5) return { success: false, error: 'Rating must be between 1 and 5.' };
+
+        const session = _readSession();
+        const sessionRole = _getRoleFromSession(session);
+        if (!session || !session.loggedIn || session.user_id !== user_id) {
+            return { success: false, error: 'You must be logged in as this user.' };
+        }
+        if (sessionRole !== 'user') return { success: false, error: 'Only normal users can edit reviews.' };
+
+        const { data: existingReview } = await client
+            .from('reviews')
+            .select('id, user_id')
+            .eq('id', review_id)
+            .maybeSingle();
+        if (!existingReview) return { success: false, error: 'Review not found.' };
+        if (existingReview.user_id !== user_id) return { success: false, error: 'You can only edit your own review.' };
+
+        const { data, error } = await client
+            .from('reviews')
+            .update({ rating: parseInt(rating, 10), comment: (comment || '').trim() || null })
+            .eq('id', review_id)
+            .eq('user_id', user_id)
+            .select()
+            .single();
+        if (error) return { success: false, error: error.message };
+        return { success: true, review: data };
+    }
+
+    async function deleteReview({ review_id, user_id }) {
+        if (!review_id || !user_id) return { success: false, error: 'Review ID and user ID are required.' };
+        const session = _readSession();
+        const sessionRole = _getRoleFromSession(session);
+        if (!session || !session.loggedIn || session.user_id !== user_id) {
+            return { success: false, error: 'You must be logged in as this user.' };
+        }
+        if (sessionRole !== 'user') return { success: false, error: 'Only normal users can delete reviews.' };
+
+        const { data: existingReview } = await client
+            .from('reviews')
+            .select('id, user_id')
+            .eq('id', review_id)
+            .maybeSingle();
+        if (!existingReview) return { success: false, error: 'Review not found.' };
+        if (existingReview.user_id !== user_id) return { success: false, error: 'You can only delete your own review.' };
+
+        const { error } = await client.from('reviews').delete().eq('id', review_id).eq('user_id', user_id);
+        if (error) return { success: false, error: error.message };
+        return { success: true };
+    }
+
+    async function submitReviewResponse({ review_id, professional_user_id, response }) {
+        if (!review_id || !professional_user_id) {
+            return { success: false, error: 'Review ID and professional user ID are required.' };
+        }
+        const cleanedResponse = (response || '').trim();
+        if (!cleanedResponse) return { success: false, error: 'Response cannot be empty.' };
+
+        const session = _readSession();
+        const sessionRole = _getRoleFromSession(session);
+        if (!session || !session.loggedIn || session.user_id !== professional_user_id) {
+            return { success: false, error: 'You must be logged in as this professional.' };
+        }
+        if (sessionRole !== 'professional') {
+            return { success: false, error: 'Only professionals can respond to reviews.' };
+        }
+
+        const { data: review, error: reviewErr } = await client
+            .from('reviews')
+            .select('id, professional_id')
+            .eq('id', review_id)
+            .maybeSingle();
+        if (reviewErr || !review) return { success: false, error: 'Review not found.' };
+
+        const { data: pro } = await client
+            .from('professionals')
+            .select('professional_id, user_id')
+            .eq('professional_id', review.professional_id)
+            .maybeSingle();
+        if (!pro) return { success: false, error: 'Professional profile not found.' };
+        if (pro.user_id !== professional_user_id) {
+            return { success: false, error: 'You can only respond to reviews on your own profile.' };
+        }
+
+        const { data, error } = await client
+            .from('reviews')
+            .update({ response: cleanedResponse })
+            .eq('id', review_id)
+            .eq('professional_id', review.professional_id)
+            .select()
+            .single();
+        if (error) return { success: false, error: error.message };
+        return { success: true, review: data };
+    }
+
     return {
-        registerUser, registerProfessional, loginUser, getSession, logout, getAllUsers, updateUser, deleteUser, emailExists,
+        registerUser, registerProfessional, loginUser, getSession, getCurrentRole, logout, getAllUsers, updateUser, deleteUser, emailExists,
         saveProfessionalProfile, getProfessionalByUserId, getAllProfessionals, uploadMedia,
         getAllProviders, getApprovedProviders, addProvider, updateProvider, deleteProvider,
+        getProfessionalById, submitReview, getReviewsForProfessional, getUserReviewForProfessional, updateReview, deleteReview, submitReviewResponse,
         approveProfessional: async (uid) => {
             const {data} = await client.from('professionals').select('professional_id').eq('user_id', uid).maybeSingle();
             if(data) await approveProfessional(data.professional_id);

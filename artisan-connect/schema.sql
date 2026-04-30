@@ -58,3 +58,17 @@ CREATE TABLE IF NOT EXISTS locations (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (professional_id) REFERENCES professionals(professional_id) ON DELETE CASCADE
 );
+
+-- 6. Reviews Table (RBAC-safe)
+CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    professional_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    response TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (professional_id, user_id),
+    FOREIGN KEY (professional_id) REFERENCES professionals(professional_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

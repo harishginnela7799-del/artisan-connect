@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     user_id BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
+    response TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
 
     -- Prevent duplicate reviews: one user → one review per professional
@@ -23,6 +24,33 @@ CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at DESC);
 
 -- 3. Enable Row Level Security (RLS)
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+-- Backfill for existing tables
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS response TEXT;
+
+-- Enforce that only normal users can be the review author.
+CREATE OR REPLACE FUNCTION enforce_review_author_role()
+RETURNS TRIGGER AS $$
+DECLARE
+    author_role TEXT;
+BEGIN
+    SELECT role INTO author_role
+    FROM users
+    WHERE user_id = NEW.user_id;
+
+    IF author_role IS DISTINCT FROM 'user' THEN
+        RAISE EXCEPTION 'Only users with role=user can create reviews.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_enforce_review_author_role ON reviews;
+CREATE TRIGGER trg_enforce_review_author_role
+BEFORE INSERT ON reviews
+FOR EACH ROW
+EXECUTE FUNCTION enforce_review_author_role();
 
 -- 4. RLS Policies
 

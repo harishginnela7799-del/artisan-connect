@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const session = (typeof ArtisanDB !== 'undefined') ? ArtisanDB.getSession() : null;
     const isLoggedIn = session && session.loggedIn;
     const currentUserId = session?.user_id;
+    const userRole = session?.role || (typeof ArtisanDB !== 'undefined' ? ArtisanDB.getCurrentRole() : null);
+    const isUser = userRole === 'user';
+    const isProfessional = userRole === 'professional';
 
     // Update navbar auth state
     setupNavbarAuth();
@@ -61,12 +64,12 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCarousel(proData);
             renderProjects(proData);
             renderReviewsSummary(averageRating, totalReviews);
-            renderReviewsList(reviews);
+            renderReviewsList(reviews, proData.user_id);
             renderPricing(proData);
             renderAboutStats(satisfaction, averageRating);
 
             // 5. Setup review form
-            await setupReviewForm(reviews);
+            await setupReviewForm(reviews, proData.user_id);
 
             // 6. Show the page
             pageLoader.classList.add('hidden');
@@ -196,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /** Render the reviews list from database data */
-    function renderReviewsList(reviews) {
+    function renderReviewsList(reviews, profileProfessionalUserId) {
         const listEl = document.getElementById('reviews-list');
         const noReviewsEl = document.getElementById('no-reviews');
 
@@ -220,6 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const stars = generateStarIcons(review.rating);
             const timeAgo = getRelativeTime(review.created_at);
 
+            const canEditOwnReview = isUser && isLoggedIn && review.user_id === currentUserId;
+            const canRespond = isProfessional && isLoggedIn && profileProfessionalUserId === currentUserId;
             const card = document.createElement('div');
             card.className = 'review-card';
             card.innerHTML = `
@@ -235,9 +240,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="review-stars-small">${stars}</div>
                 ${review.comment ? `<p class="review-text">"${escapeHtml(review.comment)}"</p>` : ''}
+                ${review.response ? `
+                    <div class="review-response">
+                        <div class="review-response-label">Professional Response</div>
+                        <p class="review-response-text">${escapeHtml(review.response)}</p>
+                    </div>
+                ` : ''}
+                ${canRespond && !review.response ? `
+                    <form class="review-response-form" data-review-id="${review.id}">
+                        <label for="response-${review.id}">Respond to this review</label>
+                        <textarea id="response-${review.id}" name="response" rows="2" maxlength="500" placeholder="Write your response..."></textarea>
+                        <button type="submit" class="review-inline-btn">Submit Response</button>
+                    </form>
+                ` : ''}
+                ${canEditOwnReview ? `
+                    <div class="review-actions">
+                        <button type="button" class="review-inline-btn" data-action="edit" data-review-id="${review.id}" data-current-rating="${review.rating}" data-current-comment="${escapeHtml(review.comment || '')}">Edit</button>
+                        <button type="button" class="review-inline-btn danger" data-action="delete" data-review-id="${review.id}">Delete</button>
+                    </div>
+                ` : ''}
             `;
             listEl.appendChild(card);
         });
+
+        bindReviewActions(profileProfessionalUserId);
     }
 
     /** Render the about section stat circles */
@@ -312,10 +338,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // REVIEW FORM SETUP
     // =========================================================
 
-    async function setupReviewForm(existingReviews) {
+    async function setupReviewForm(existingReviews, profileProfessionalUserId) {
         const loginPrompt = document.getElementById('review-login-prompt');
+        const professionalPrompt = document.getElementById('review-professional-prompt');
         const alreadySubmitted = document.getElementById('review-already-submitted');
         const reviewForm = document.getElementById('review-form');
+        const reviewFormTitle = document.getElementById('review-form-title');
+        const reviewFormCard = document.getElementById('review-form-card');
         const starSelector = document.getElementById('star-selector');
         const ratingTextEl = document.getElementById('star-rating-text');
         const commentInput = document.getElementById('review-comment');
@@ -324,9 +353,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let selectedRating = 0;
 
+        const isViewingOwnProfessionalProfile = isProfessional && currentUserId === profileProfessionalUserId;
+        reviewFormTitle.textContent = isViewingOwnProfessionalProfile ? 'Respond to Reviews' : 'Write a Review';
+
         if (!isLoggedIn) {
             // Show login prompt, hide form
             loginPrompt.classList.remove('hidden');
+            professionalPrompt.classList.add('hidden');
+            alreadySubmitted.classList.add('hidden');
+            reviewForm.classList.add('hidden');
+            return;
+        }
+
+        if (!isUser) {
+            loginPrompt.classList.add('hidden');
+            professionalPrompt.classList.remove('hidden');
             alreadySubmitted.classList.add('hidden');
             reviewForm.classList.add('hidden');
             return;
@@ -337,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (existingReview) {
             loginPrompt.classList.add('hidden');
+            professionalPrompt.classList.add('hidden');
             alreadySubmitted.classList.remove('hidden');
             reviewForm.classList.add('hidden');
             return;
@@ -344,8 +386,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show the form
         loginPrompt.classList.add('hidden');
+        professionalPrompt.classList.add('hidden');
         alreadySubmitted.classList.add('hidden');
         reviewForm.classList.remove('hidden');
+        reviewFormCard.classList.remove('hidden');
 
         // Star rating interaction
         const starBtns = starSelector.querySelectorAll('.star-btn');
@@ -431,13 +475,99 @@ document.addEventListener('DOMContentLoaded', () => {
             const satisfaction = ArtisanDB.calculateClientSatisfaction(updatedReviews);
 
             renderReviewsSummary(averageRating, totalReviews);
-            renderReviewsList(updatedReviews);
+            renderReviewsList(updatedReviews, profileProfessionalUserId);
             renderAboutStats(satisfaction, averageRating);
 
             // Update profile overlay rating
             document.getElementById('profile-rating').querySelector('.rating-value').textContent = averageRating.toFixed(1);
             document.getElementById('profile-rating').querySelector('.rating-count').textContent = `(${totalReviews} review${totalReviews !== 1 ? 's' : ''})`;
         });
+    }
+
+    function bindReviewActions(profileProfessionalUserId) {
+        const reviewsList = document.getElementById('reviews-list');
+        if (!reviewsList) return;
+
+        reviewsList.querySelectorAll('.review-response-form').forEach((form) => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const reviewId = parseInt(form.dataset.reviewId, 10);
+                const textarea = form.querySelector('textarea[name="response"]');
+                const responseText = (textarea?.value || '').trim();
+                if (!responseText) {
+                    showToast('Please enter a response.', 'error');
+                    return;
+                }
+                const result = await ArtisanDB.submitReviewResponse({
+                    review_id: reviewId,
+                    professional_user_id: currentUserId,
+                    response: responseText
+                });
+                if (!result.success) {
+                    showToast(result.error || 'Failed to submit response.', 'error');
+                    return;
+                }
+                showToast('Response posted successfully.', 'success');
+                refreshReviews(profileProfessionalUserId);
+            });
+        });
+
+        reviewsList.querySelectorAll('[data-action="edit"]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const reviewId = parseInt(btn.dataset.reviewId, 10);
+                const currentRating = parseInt(btn.dataset.currentRating, 10);
+                const currentComment = btn.dataset.currentComment || '';
+                const newRating = parseInt(window.prompt('Update rating (1-5):', String(currentRating)), 10);
+                if (!newRating || newRating < 1 || newRating > 5) {
+                    showToast('Rating must be between 1 and 5.', 'error');
+                    return;
+                }
+                const newComment = window.prompt('Update your comment:', currentComment);
+                if (newComment === null) return;
+                const result = await ArtisanDB.updateReview({
+                    review_id: reviewId,
+                    user_id: currentUserId,
+                    rating: newRating,
+                    comment: newComment
+                });
+                if (!result.success) {
+                    showToast(result.error || 'Failed to update review.', 'error');
+                    return;
+                }
+                showToast('Review updated successfully.', 'success');
+                refreshReviews(profileProfessionalUserId);
+            });
+        });
+
+        reviewsList.querySelectorAll('[data-action="delete"]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+                const reviewId = parseInt(btn.dataset.reviewId, 10);
+                const shouldDelete = window.confirm('Delete this review?');
+                if (!shouldDelete) return;
+                const result = await ArtisanDB.deleteReview({
+                    review_id: reviewId,
+                    user_id: currentUserId
+                });
+                if (!result.success) {
+                    showToast(result.error || 'Failed to delete review.', 'error');
+                    return;
+                }
+                showToast('Review deleted.', 'success');
+                refreshReviews(profileProfessionalUserId);
+            });
+        });
+    }
+
+    async function refreshReviews(profileProfessionalUserId) {
+        const updatedReviews = await ArtisanDB.getReviewsForProfessional(professionalId);
+        const { averageRating, totalReviews } = ArtisanDB.calculateAverageRating(updatedReviews);
+        const satisfaction = ArtisanDB.calculateClientSatisfaction(updatedReviews);
+        renderReviewsSummary(averageRating, totalReviews);
+        renderReviewsList(updatedReviews, profileProfessionalUserId);
+        renderAboutStats(satisfaction, averageRating);
+        await setupReviewForm(updatedReviews, profileProfessionalUserId);
+        document.getElementById('profile-rating').querySelector('.rating-value').textContent = averageRating.toFixed(1);
+        document.getElementById('profile-rating').querySelector('.rating-count').textContent = `(${totalReviews} review${totalReviews !== 1 ? 's' : ''})`;
     }
 
     // =========================================================

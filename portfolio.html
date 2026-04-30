@@ -225,13 +225,19 @@
                 <div class="review-form-card" id="review-form-card">
                     <div class="review-form-header">
                         <span class="material-icons-round">edit</span>
-                        <h3>Write a Review</h3>
+                        <h3 id="review-form-title">Write a Review</h3>
                     </div>
 
                     <!-- Login prompt (shown when not logged in) -->
                     <div class="review-login-prompt" id="review-login-prompt">
                         <span class="material-icons-round">lock</span>
                         <p>Please <a href="login.html">log in</a> to submit a review.</p>
+                    </div>
+
+                    <!-- Professional prompt -->
+                    <div class="review-professional-prompt hidden" id="review-professional-prompt">
+                        <span class="material-icons-round">forum</span>
+                        <p>Professionals cannot write reviews. You can respond to reviews posted on your profile.</p>
                     </div>
 
                     <!-- Already reviewed message -->
