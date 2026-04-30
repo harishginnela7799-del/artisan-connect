@@ -25,6 +25,16 @@ const ArtisanDB = (() => {
     function _readSession() { try { return JSON.parse(localStorage.getItem(KEYS.SESSION) || 'null'); } catch { return null; } }
     function _isValidRole(role) { return role === 'user' || role === 'professional'; }
     function _getRoleFromSession(session) { return _isValidRole(session?.role) ? session.role : null; }
+    async function _getRoleFromUserRow(userId) {
+        if (!userId) return null;
+        const { data } = await client.from('users').select('role').eq('user_id', userId).maybeSingle();
+        return _isValidRole(data?.role) ? data.role : null;
+    }
+    async function _resolveRole(userId, session = null) {
+        const roleFromSession = _getRoleFromSession(session || _readSession());
+        if (roleFromSession) return roleFromSession;
+        return await _getRoleFromUserRow(userId);
+    }
     function _normStr(v) { return (v ?? '').toString().trim().toLowerCase(); }
     function _normServiceType(v) {
         const s = _normStr(v);
@@ -202,6 +212,7 @@ const ArtisanDB = (() => {
     // =========================================================
     function getSession() { return _readSession(); }
     function getCurrentRole() { return _getRoleFromSession(_readSession()); }
+    async function getRoleForUser(userId) { return await _getRoleFromUserRow(userId); }
     function logout() { localStorage.removeItem(KEYS.SESSION); }
     
     async function getAllUsers() {
@@ -361,7 +372,7 @@ const ArtisanDB = (() => {
             return { success: false, error: 'Professional ID and User ID are required.' };
         }
         const session = _readSession();
-        const sessionRole = _getRoleFromSession(session);
+        const sessionRole = await _resolveRole(user_id, session);
         if (!session || !session.loggedIn || session.user_id !== user_id) {
             return { success: false, error: 'You must be logged in as this user.' };
         }
@@ -390,8 +401,8 @@ const ArtisanDB = (() => {
                 professional_id,
                 user_id,
                 rating: parseInt(rating, 10),
-            comment: (comment || '').trim() || null,
-            response: null
+                comment: (comment || '').trim() || null,
+                response: null
             }])
             .select()
             .single();
@@ -452,7 +463,7 @@ const ArtisanDB = (() => {
         if (!rating || rating < 1 || rating > 5) return { success: false, error: 'Rating must be between 1 and 5.' };
 
         const session = _readSession();
-        const sessionRole = _getRoleFromSession(session);
+        const sessionRole = await _resolveRole(user_id, session);
         if (!session || !session.loggedIn || session.user_id !== user_id) {
             return { success: false, error: 'You must be logged in as this user.' };
         }
@@ -488,7 +499,7 @@ const ArtisanDB = (() => {
     async function deleteReview({ review_id, user_id }) {
         if (!review_id || !user_id) return { success: false, error: 'Review ID and user ID are required.' };
         const session = _readSession();
-        const sessionRole = _getRoleFromSession(session);
+        const sessionRole = await _resolveRole(user_id, session);
         if (!session || !session.loggedIn || session.user_id !== user_id) {
             return { success: false, error: 'You must be logged in as this user.' };
         }
@@ -523,7 +534,7 @@ const ArtisanDB = (() => {
         if (!cleanedResponse) return { success: false, error: 'Response cannot be empty.' };
 
         const session = _readSession();
-        const sessionRole = _getRoleFromSession(session);
+        const sessionRole = await _resolveRole(professional_user_id, session);
         if (!session || !session.loggedIn || session.user_id !== professional_user_id) {
             return { success: false, error: 'You must be logged in as this professional.' };
         }
@@ -586,7 +597,7 @@ const ArtisanDB = (() => {
     }
 
     return {
-        registerUser, registerProfessional, loginUser, getSession, getCurrentRole, logout, getAllUsers, updateUser, deleteUser, emailExists,
+        registerUser, registerProfessional, loginUser, getSession, getCurrentRole, getRoleForUser, logout, getAllUsers, updateUser, deleteUser, emailExists,
         saveProfessionalProfile, getProfessionalByUserId, getAllProfessionals, uploadMedia,
         getAllProviders, getApprovedProviders, addProvider, updateProvider, deleteProvider,
         // Professional profile (portfolio page)

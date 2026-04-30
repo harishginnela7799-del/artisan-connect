@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const session = (typeof ArtisanDB !== 'undefined') ? ArtisanDB.getSession() : null;
     const isLoggedIn = session && session.loggedIn;
     const currentUserId = session?.user_id;
-    const userRole = session?.role || (typeof ArtisanDB !== 'undefined' ? ArtisanDB.getCurrentRole() : null);
-    const isUser = userRole === 'user';
-    const isProfessional = userRole === 'professional';
+    let userRole = session?.role || (typeof ArtisanDB !== 'undefined' ? ArtisanDB.getCurrentRole() : null);
+    let isUser = userRole === 'user';
+    let isProfessional = userRole === 'professional';
 
     // Update navbar auth state
     setupNavbarAuth();
@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function init() {
         try {
+            await hydrateRole();
+
             // 1. Fetch professional data from database
             const proData = await ArtisanDB.getProfessionalById(professionalId);
 
@@ -85,6 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error('Failed to load professional profile:', err);
             showError('Something went wrong while loading this profile. Please try again later.');
+        }
+    }
+
+    async function hydrateRole() {
+        if (!isLoggedIn || !currentUserId || userRole) return;
+        const fetchedRole = await ArtisanDB.getRoleForUser(currentUserId);
+        if (fetchedRole) {
+            userRole = fetchedRole;
+            isUser = userRole === 'user';
+            isProfessional = userRole === 'professional';
         }
     }
 
