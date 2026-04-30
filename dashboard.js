@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const city = cities.find(c => String(c.id) === String(id));
         if (!city) return;
 
-        await openModal(
+        const confirmed = await openModal(
             'Delete City',
             `<div class="delete-confirm-text">
                 <span class="material-icons-round">warning</span>
@@ -190,18 +190,20 @@ document.addEventListener('DOMContentLoaded', () => {
              </div>`,
             'Delete', 'btn-danger'
         );
+        if (!confirmed) return;
+
         const btn = document.getElementById('modal-confirm');
         if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
         
         await ArtisanDB.deleteCity(city.id);
-        closeModal(null);
         showToast('City deleted!', 'error');
         await renderCities();
     }
 
     // Add City Button
     document.getElementById('add-city-btn')?.addEventListener('click', async () => {
-        await openModal('Add New City', '<div class="modal-field"><label>City Name *</label><input id="cf-name" placeholder="e.g. Pune"></div>', 'Add City', 'btn-primary');
+        const confirmed = await openModal('Add New City', '<div class="modal-field"><label>City Name *</label><input id="cf-name" placeholder="e.g. Pune"></div>', 'Add City', 'btn-primary');
+        if (!confirmed) return;
         const name = document.getElementById('cf-name')?.value.trim();
         if (!name) { showToast('City name is required', 'error'); return; }
         

@@ -16,6 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToLogin  = document.getElementById('back-to-login');
     const tabSwitcher  = document.getElementById('tab-switcher');
 
+    // ========== LOAD ACTIVE CITIES INTO SIGNUP DROPDOWN ==========
+    if (typeof ArtisanDB !== 'undefined') {
+        (async () => {
+            const locationSelect = document.getElementById('signup-location');
+            if (locationSelect) {
+                const cities = await ArtisanDB.getActiveCities();
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.name;
+                    option.textContent = city.name;
+                    locationSelect.appendChild(option);
+                });
+            }
+        })();
+    }
+
     // ========== TAB SWITCHING ==========
     function switchTab(tab) {
         if (tab === 'login') {
