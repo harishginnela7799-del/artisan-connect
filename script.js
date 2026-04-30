@@ -156,6 +156,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== CITY FILTER CHIPS ==========
     const cityFilters = document.getElementById('city-filters');
     if (cityFilters) {
+        // Dynamically load active cities
+        if (typeof ArtisanDB !== 'undefined') {
+            (async () => {
+                const cities = await ArtisanDB.getActiveCities();
+                cities.forEach(city => {
+                    const btn = document.createElement('button');
+                    btn.className = 'chip';
+                    btn.dataset.city = city.name.toLowerCase();
+                    btn.textContent = city.name;
+                    cityFilters.appendChild(btn);
+                });
+            })();
+        }
+
         cityFilters.addEventListener('click', (e) => {
             const chip = e.target.closest('.chip');
             if (!chip) return;

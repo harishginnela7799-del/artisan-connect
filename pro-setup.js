@@ -26,6 +26,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
     }
 
+    // ========== LOAD CITIES ==========
+    (async () => {
+        if (typeof ArtisanDB !== 'undefined') {
+            const citySelect = document.getElementById('pro-city');
+            if (citySelect) {
+                const cities = await ArtisanDB.getActiveCities();
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.name;
+                    option.textContent = city.name;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+    })();
+
     // ========== STEP NAVIGATION ==========
     const steps = document.querySelectorAll('.setup-step');
     const stepDots = document.querySelectorAll('.step-dot');

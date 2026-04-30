@@ -595,6 +595,58 @@ const ArtisanDB = (() => {
         return parseFloat((satisfactionSum / reviews.length).toFixed(1));
     }
 
+    // =========================================================
+    // 6. City Management
+    // =========================================================
+    async function getAllCities() {
+        const { data: cities, error } = await client
+            .from('cities')
+            .select('*')
+            .order('name', { ascending: true });
+        if (error) return [];
+        return cities || [];
+    }
+
+    async function getActiveCities() {
+        const { data: cities, error } = await client
+            .from('cities')
+            .select('*')
+            .eq('is_active', true)
+            .order('name', { ascending: true });
+        if (error) return [];
+        return cities || [];
+    }
+
+    async function addCity(name) {
+        if (!name || !name.trim()) return { success: false, error: 'City name is required.' };
+        const { data, error } = await client
+            .from('cities')
+            .insert([{ name: name.trim() }])
+            .select()
+            .single();
+        if (error) {
+            if (error.code === '23505') return { success: false, error: 'City already exists.' };
+            return { success: false, error: error.message };
+        }
+        return { success: true, city: data };
+    }
+
+    async function toggleCityStatus(id, isActive) {
+        const { error } = await client
+            .from('cities')
+            .update({ is_active: isActive })
+            .eq('id', id);
+        return { success: !error, error: error?.message };
+    }
+
+    async function deleteCity(id) {
+        const { error } = await client
+            .from('cities')
+            .delete()
+            .eq('id', id);
+        return { success: !error, error: error?.message };
+    }
+
     return {
         registerUser, registerProfessional, loginUser, getSession, getCurrentRole, getRoleForUser, logout, getAllUsers, updateUser, deleteUser, emailExists,
         saveProfessionalProfile, getProfessionalByUserId, getAllProfessionals, uploadMedia,
@@ -604,6 +656,8 @@ const ArtisanDB = (() => {
         // Review system
         submitReview, getReviewsForProfessional, getUserReviewForProfessional, updateReview, deleteReview, submitReviewResponse,
         calculateAverageRating, calculateClientSatisfaction,
+        // City management
+        getAllCities, getActiveCities, addCity, toggleCityStatus, deleteCity,
         approveProfessional: async (uid) => {
             const {data} = await client.from('professionals').select('professional_id').eq('user_id', uid).maybeSingle();
             if (!data?.professional_id) return { success: false, error: 'Professional record not found for this user.' };

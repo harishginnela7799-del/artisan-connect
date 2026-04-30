@@ -73,6 +73,10 @@
                     <span class="link-text">Analytics</span>
                     <span class="sidebar-new-tag">NEW</span>
                 </a>
+                <a href="#cities" class="sidebar-link" data-section="cities" id="nav-cities">
+                    <span class="material-icons-round">location_city</span>
+                    <span class="link-text">Manage Cities</span>
+                </a>
             </div>
             <div class="sidebar-section">
                 <span class="sidebar-label">ACCOUNT</span>
@@ -452,6 +456,36 @@
             <div class="settings-card">
                 <h3>Profile Settings</h3>
                 <p>Account and profile configuration coming soon.</p>
+            </div>
+        </section>
+
+        <!-- ===== CITIES SECTION ===== -->
+        <section class="dash-section" id="section-cities">
+            <div class="section-topbar">
+                <div>
+                    <h1 class="dash-title">Manage Cities</h1>
+                    <p class="dash-subtitle">Enable or disable cities to control where the platform is available</p>
+                </div>
+                <button class="btn-primary" id="add-city-btn">
+                    <span class="material-icons-round">add_location</span>
+                    Add City
+                </button>
+            </div>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="data-table" id="cities-table">
+                        <thead>
+                            <tr>
+                                <th>City Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cities-tbody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>

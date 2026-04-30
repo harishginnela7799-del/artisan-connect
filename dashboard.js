@@ -125,6 +125,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
+    // CITIES SECTION — Live DB
+    // ============================================================
+    async function renderCities() {
+        const tbody = document.getElementById('cities-tbody');
+        if (!tbody) return;
+        const cities = await ArtisanDB.getAllCities();
+        
+        if (cities.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#999;padding:32px">No cities found. Add some!</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = cities.map(c => `
+            <tr>
+                <td><strong>${c.name}</strong></td>
+                <td><span class="status-dot ${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Enabled' : 'Disabled'}</span></td>
+                <td>
+                    <button class="action-btn" data-action="toggle-city" data-id="${c.id}" aria-label="Toggle Status"><span class="material-icons-round">${c.is_active ? 'pause_circle' : 'play_circle'}</span></button>
+                    <button class="action-btn danger" data-action="delete-city" data-id="${c.id}" aria-label="Delete"><span class="material-icons-round">delete</span></button>
+                </td>
+            </tr>
+        `).join('');
+
+        tbody.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleCityAction(btn.dataset.action, btn.dataset.id));
+        });
+    }
+
+    async function handleCityAction(action, id) {
+        const cities = await ArtisanDB.getAllCities();
+        const city = cities.find(c => String(c.id) === String(id));
+        if (!city) return;
+
+        if (action === 'toggle-city') {
+            const newStatus = !city.is_active;
+            const result = await ArtisanDB.toggleCityStatus(city.id, newStatus);
+            if (!result.success) { showToast(result.error || 'Failed to toggle status', 'error'); return; }
+            showToast(`City ${newStatus ? 'enabled' : 'disabled'}!`, newStatus ? 'success' : 'info');
+            await renderCities();
+        }
+
+        if (action === 'delete-city') {
+            await openModal(
+                'Delete City',
+                `<div class="delete-confirm-text">
+                    <span class="material-icons-round">warning</span>
+                    <p>Are you sure you want to delete <strong>${city.name}</strong>?</p>
+                 </div>`,
+                'Delete', 'btn-danger'
+            );
+            const btn = document.getElementById('modal-confirm');
+            if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
+            
+            await ArtisanDB.deleteCity(city.id);
+            closeModal(null);
+            showToast('City deleted!', 'error');
+            await renderCities();
+        }
+    }
+
+    // Add City Button
+    document.getElementById('add-city-btn')?.addEventListener('click', async () => {
+        await openModal('Add New City', '<div class="modal-field"><label>City Name *</label><input id="cf-name" placeholder="e.g. Pune"></div>', 'Add City', 'btn-primary');
+        const name = document.getElementById('cf-name')?.value.trim();
+        if (!name) { showToast('City name is required', 'error'); return; }
+        
+        const result = await ArtisanDB.addCity(name);
+        if (!result.success) {
+            showToast(result.error || 'Failed to add city', 'error');
+        } else {
+            showToast('City added successfully!', 'success');
+            await renderCities();
+        }
+    });
+
+    (async () => {
+        if(document.getElementById('section-cities')) {
+            await renderCities();
+        }
+    })();
+
+    // ============================================================
     // PROVIDERS SECTION — Live DB
     // ============================================================
     const imgOptions = ['images/living_room.png','images/kitchen.png','images/fireplace.png','images/modern.png','images/study.png','images/dining.png','images/bedroom.png','images/bathroom.png'];
