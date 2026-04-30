@@ -142,47 +142,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong>${c.name}</strong></td>
                 <td><span class="status-dot ${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Enabled' : 'Disabled'}</span></td>
                 <td>
-                    <button class="action-btn" data-action="toggle-city" data-id="${c.id}" aria-label="Toggle Status"><span class="material-icons-round">${c.is_active ? 'pause_circle' : 'play_circle'}</span></button>
-                    <button class="action-btn danger" data-action="delete-city" data-id="${c.id}" aria-label="Delete"><span class="material-icons-round">delete</span></button>
+                    <div class="radio-group" style="display:flex; gap: 16px; align-items:center;">
+                        <label style="cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
+                            <input type="radio" name="city_${c.id}" data-id="${c.id}" value="on" ${c.is_active ? 'checked' : ''} class="city-radio"> ON
+                        </label>
+                        <label style="cursor:pointer; font-weight:600; display:flex; align-items:center; gap:4px;">
+                            <input type="radio" name="city_${c.id}" data-id="${c.id}" value="off" ${!c.is_active ? 'checked' : ''} class="city-radio"> OFF
+                        </label>
+                        <button class="action-btn danger" data-action="delete-city" data-id="${c.id}" aria-label="Delete" style="margin-left: 20px;"><span class="material-icons-round">delete</span></button>
+                    </div>
                 </td>
             </tr>
         `).join('');
 
-        tbody.querySelectorAll('.action-btn').forEach(btn => {
-            btn.addEventListener('click', () => handleCityAction(btn.dataset.action, btn.dataset.id));
+        tbody.querySelectorAll('.city-radio').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                handleCityToggle(e.target.dataset.id, e.target.value === 'on');
+            });
+        });
+
+        tbody.querySelectorAll('[data-action="delete-city"]').forEach(btn => {
+            btn.addEventListener('click', () => handleCityDelete(btn.dataset.id));
         });
     }
 
-    async function handleCityAction(action, id) {
+    async function handleCityToggle(id, newStatus) {
+        const result = await ArtisanDB.toggleCityStatus(id, newStatus);
+        if (!result.success) { 
+            showToast(result.error || 'Failed to toggle status', 'error'); 
+            await renderCities(); // revert UI if failed
+            return; 
+        }
+        showToast(`City ${newStatus ? 'enabled' : 'disabled'}!`, newStatus ? 'success' : 'info');
+        await renderCities();
+    }
+
+    async function handleCityDelete(id) {
         const cities = await ArtisanDB.getAllCities();
         const city = cities.find(c => String(c.id) === String(id));
         if (!city) return;
 
-        if (action === 'toggle-city') {
-            const newStatus = !city.is_active;
-            const result = await ArtisanDB.toggleCityStatus(city.id, newStatus);
-            if (!result.success) { showToast(result.error || 'Failed to toggle status', 'error'); return; }
-            showToast(`City ${newStatus ? 'enabled' : 'disabled'}!`, newStatus ? 'success' : 'info');
-            await renderCities();
-        }
-
-        if (action === 'delete-city') {
-            await openModal(
-                'Delete City',
-                `<div class="delete-confirm-text">
-                    <span class="material-icons-round">warning</span>
-                    <p>Are you sure you want to delete <strong>${city.name}</strong>?</p>
-                 </div>`,
-                'Delete', 'btn-danger'
-            );
-            const btn = document.getElementById('modal-confirm');
-            if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
-            
-            await ArtisanDB.deleteCity(city.id);
-            closeModal(null);
-            showToast('City deleted!', 'error');
-            await renderCities();
-        }
+        await openModal(
+            'Delete City',
+            `<div class="delete-confirm-text">
+                <span class="material-icons-round">warning</span>
+                <p>Are you sure you want to delete <strong>${city.name}</strong>?</p>
+             </div>`,
+            'Delete', 'btn-danger'
+        );
+        const btn = document.getElementById('modal-confirm');
+        if (btn) btn.style.cssText = 'background:#e53935;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif';
+        
+        await ArtisanDB.deleteCity(city.id);
+        closeModal(null);
+        showToast('City deleted!', 'error');
+        await renderCities();
     }
 
     // Add City Button
