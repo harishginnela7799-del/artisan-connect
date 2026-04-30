@@ -1267,4 +1267,28 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
     .profile-meta { font-size: 0.82rem; }
     .modal { padding: 28px 20px; }
     .btn-back { padding: 8px; }
+    .portfolio-section { padding: 48px 0; }
+    .container { padding: 0 16px; }
+    .about-stats { flex-direction: column; }
+    .cta-card { padding: 40px 20px; }
+    .cta-heading { font-size: 1.5rem; }
+    .cta-desc { font-size: 0.92rem; }
+    .cta-btn { padding: 12px 24px; font-size: 0.88rem; }
+    .footer-inner { flex-direction: column; text-align: center; gap: 8px; }
 }
+
+@media (max-width: 400px) {
+    .cover-section { height: 260px; }
+    .profile-name { font-size: 1.3rem; }
+    .profile-badges { gap: 8px; }
+    .verified-badge { font-size: 0.72rem; padding: 3px 10px; }
+    .navbar-inner { padding: 0 12px; }
+    .logo { font-size: 1.25rem; }
+    .port-section-title { font-size: 1.3rem; }
+    .section-icon { width: 36px; height: 36px; font-size: 1.2rem; }
+    .review-card { padding: 20px 16px; }
+    .review-big-num { font-size: 2rem; }
+    .pricing-card { padding: 24px 16px; }
+    .pricing-price { font-size: 2.2rem; }
+}
+

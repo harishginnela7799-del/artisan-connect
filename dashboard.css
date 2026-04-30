@@ -939,7 +939,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 @media (max-width: 600px) {
-    .main-content { padding: 20px 16px; }
+    .main-content { padding: 20px 12px; }
     .stats-row { grid-template-columns: 1fr; }
     .kpi-grid { grid-template-columns: 1fr; }
     .portfolio-grid { grid-template-columns: 1fr; }
@@ -950,4 +950,68 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
     .lead-meta { flex-wrap: wrap; }
     .section-topbar { flex-direction: column; }
     .donut-wrapper { flex-direction: column; }
+    .dash-title { font-size: 1.4rem; }
+    .topbar { padding: 0 12px; }
+    .topbar-right { gap: 8px; }
+    .profile-chevron { display: none; }
+
+    /* Fix data tables on mobile */
+    .data-table td,
+    .data-table th {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+
+    /* City radio buttons stack on very small screens */
+    .radio-group {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    /* Toast fix for small screens */
+    .toast {
+        left: 16px;
+        right: 16px;
+        transform: translateX(0) translateY(100px);
+        text-align: center;
+        justify-content: center;
+        white-space: normal;
+        padding: 12px 16px;
+    }
+    .toast.show {
+        transform: translateX(0) translateY(0);
+    }
+
+    /* Settings and cards padding */
+    .settings-card { padding: 24px 16px; }
+    .chart-body { padding: 12px; }
+    .chart-header { padding: 14px 16px; }
+
+    /* Modal fix for small screens */
+    .modal-box {
+        width: 95vw !important;
+        padding: 20px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .topbar {
+        height: 56px;
+        padding: 0 10px;
+    }
+    .sidebar {
+        top: 56px;
+        height: calc(100vh - 56px);
+    }
+    .main-content {
+        margin-top: 56px;
+        padding: 16px 10px;
+    }
+    .logo { font-size: 1.15rem; }
+    .btn-primary {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+    }
+    .dash-title { font-size: 1.2rem; }
+    .dash-subtitle { font-size: 0.8rem; }
 }

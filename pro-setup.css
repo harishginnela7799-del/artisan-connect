@@ -575,4 +575,51 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 @media (max-width: 500px) {
     .profession-grid { grid-template-columns: 1fr; }
     .upload-grid { grid-template-columns: 1fr; }
+    .setup-topbar { padding: 0 16px; }
+    .setup-footer { padding: 12px 16px; }
+    .step-title { font-size: 1.3rem; }
+    .step-desc { font-size: 0.88rem; }
+
+    .btn-next {
+        padding: 10px 24px;
+        font-size: 0.88rem;
+    }
+    .btn-back {
+        padding: 10px 16px;
+        font-size: 0.82rem;
+    }
+
+    .complete-title { font-size: 1.6rem; }
+    .btn-go-live {
+        padding: 14px 28px;
+        font-size: 0.92rem;
+    }
+
+    /* Toast fix for small screens */
+    .toast {
+        left: 16px;
+        right: 16px;
+        transform: translateX(0) translateY(60px);
+        white-space: normal;
+        text-align: center;
+        justify-content: center;
+    }
+    .toast.show {
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@media (max-width: 400px) {
+    .setup-topbar {
+        padding: 0 12px;
+        height: 56px;
+    }
+    .progress-track { top: 56px; }
+    .logo { font-size: 1.1rem; }
+    .user-name { display: none; }
+    .step-circle { width: 36px; height: 36px; }
+    .step-circle .material-icons-round { font-size: 1rem; }
+    .setup-main { padding: 20px 12px 100px; }
+    .profession-card { padding: 20px 16px; }
+    .profession-icon { width: 44px; height: 44px; }
 }
