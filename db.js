@@ -302,10 +302,164 @@ const ArtisanDB = (() => {
          return {success: !error, error: error?.message};
     }
 
+    // =========================================================
+    // 5. Review System
+    // =========================================================
+
+    /**
+     * Fetch a single professional by professional_id with joined user data.
+     * Used by the portfolio/profile page to show real database data.
+     */
+    async function getProfessionalById(professionalId) {
+        const { data: pro, error } = await client
+            .from('professionals')
+            .select('*, users(*)')
+            .eq('professional_id', professionalId)
+            .maybeSingle();
+
+        if (error || !pro) return null;
+
+        const user = pro.users || {};
+        const { password_hash: _, ...safeUser } = user;
+
+        // Fetch location details
+        const { data: loc } = await client
+            .from('locations')
+            .select('*')
+            .eq('professional_id', professionalId)
+            .maybeSingle();
+
+        return {
+            professional_id: pro.professional_id,
+            user_id: pro.user_id,
+            company_name: pro.company_name,
+            service_type: _normServiceType(pro.service_type) || 'builder',
+            location: pro.location || loc?.city || 'Unknown',
+            verification_status: pro.verification_status,
+            portfolio_images: pro.portfolio_images,
+            portfolio_video: pro.portfolio_video,
+            created_at: pro.created_at,
+            email: safeUser.email,
+            phone: safeUser.phone,
+            name: safeUser.name || pro.company_name,
+        };
+    }
+
+    /**
+     * Submit a review for a professional.
+     * Enforces one review per user per professional via DB unique constraint.
+     */
+    async function submitReview({ professional_id, user_id, rating, comment }) {
+        // Validate rating range
+        if (!rating || rating < 1 || rating > 5) {
+            return { success: false, error: 'Rating must be between 1 and 5.' };
+        }
+        if (!professional_id || !user_id) {
+            return { success: false, error: 'Professional ID and User ID are required.' };
+        }
+
+        // Check for duplicate review (belt-and-suspenders; DB also enforces this)
+        const existing = await getUserReviewForProfessional(user_id, professional_id);
+        if (existing) {
+            return { success: false, error: 'You have already reviewed this professional.' };
+        }
+
+        const { data, error } = await client
+            .from('reviews')
+            .insert([{
+                professional_id,
+                user_id,
+                rating: parseInt(rating, 10),
+                comment: (comment || '').trim() || null
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            // Handle unique constraint violation gracefully
+            if (error.code === '23505') {
+                return { success: false, error: 'You have already reviewed this professional.' };
+            }
+            return { success: false, error: error.message };
+        }
+
+        return { success: true, review: data };
+    }
+
+    /**
+     * Fetch all reviews for a professional, joined with user names.
+     * Ordered newest first.
+     */
+    async function getReviewsForProfessional(professionalId) {
+        const { data: reviews, error } = await client
+            .from('reviews')
+            .select('*, users(name, email)')
+            .eq('professional_id', professionalId)
+            .order('created_at', { ascending: false });
+
+        if (error) return [];
+
+        return (reviews || []).map(r => ({
+            id: r.id,
+            professional_id: r.professional_id,
+            user_id: r.user_id,
+            rating: r.rating,
+            comment: r.comment,
+            created_at: r.created_at,
+            reviewer_name: r.users?.name || 'Anonymous',
+            reviewer_email: r.users?.email || '',
+        }));
+    }
+
+    /**
+     * Check if a user already has a review for a given professional.
+     * Returns the review object if found, null otherwise.
+     */
+    async function getUserReviewForProfessional(userId, professionalId) {
+        const { data } = await client
+            .from('reviews')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('professional_id', professionalId)
+            .maybeSingle();
+        return data || null;
+    }
+
+    /**
+     * Calculate average rating from an array of review objects.
+     * Returns { averageRating, totalReviews }
+     */
+    function calculateAverageRating(reviews) {
+        if (!reviews || reviews.length === 0) {
+            return { averageRating: 0, totalReviews: 0 };
+        }
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+        return {
+            averageRating: parseFloat((sum / reviews.length).toFixed(1)),
+            totalReviews: reviews.length
+        };
+    }
+
+    /**
+     * Calculate Client Satisfaction percentage from reviews.
+     * Formula: (SUM of each rating * 20) / total reviews
+     *   5★ = 100%, 4★ = 80%, 3★ = 60%, 2★ = 40%, 1★ = 20%
+     */
+    function calculateClientSatisfaction(reviews) {
+        if (!reviews || reviews.length === 0) return 0;
+        const satisfactionSum = reviews.reduce((acc, r) => acc + (r.rating * 20), 0);
+        return parseFloat((satisfactionSum / reviews.length).toFixed(1));
+    }
+
     return {
         registerUser, registerProfessional, loginUser, getSession, logout, getAllUsers, updateUser, deleteUser, emailExists,
         saveProfessionalProfile, getProfessionalByUserId, getAllProfessionals, uploadMedia,
         getAllProviders, getApprovedProviders, addProvider, updateProvider, deleteProvider,
+        // Professional profile (portfolio page)
+        getProfessionalById,
+        // Review system
+        submitReview, getReviewsForProfessional, getUserReviewForProfessional,
+        calculateAverageRating, calculateClientSatisfaction,
         approveProfessional: async (uid) => {
             const {data} = await client.from('professionals').select('professional_id').eq('user_id', uid).maybeSingle();
             if (!data?.professional_id) return { success: false, error: 'Professional record not found for this user.' };
